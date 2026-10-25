@@ -2,8 +2,6 @@
 name: "finding-validator"
 description: "由规划者按需选择，核验影响结果的具体争议发现。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob"]
 injectAgentsMd: true
 ---

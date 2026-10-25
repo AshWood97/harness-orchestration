@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex ZCode"
+  short_description: "Codex 指挥本机 ZCode 执行任务，沿用当前模型并跟进结果"
+  default_prompt: "使用 $codex-zcode 将这个任务交给本机 ZCode 执行，由 Codex 检查结果。"
+policy:
+  allow_implicit_invocation: true

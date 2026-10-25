@@ -3,12 +3,16 @@ name: Test skills
 on:
   push:
     paths:
-      - '.agents/skills/codex-external-provider/**'
-      - '.agents/skills/codex-harness-bridge/**'
+      - '.agents/skills/codex-zcode/**'
+      - 'zcode/**'
+      - 'scripts/build_zcode_runtime.mjs'
+      - '.github/workflows/tests.yml'
   pull_request:
     paths:
-      - '.agents/skills/codex-external-provider/**'
-      - '.agents/skills/codex-harness-bridge/**'
+      - '.agents/skills/codex-zcode/**'
+      - 'zcode/**'
+      - 'scripts/build_zcode_runtime.mjs'
+      - '.github/workflows/tests.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,36 +24,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ['3.11', '3.12']
+        os: [macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.0.0
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Check package and run tests
+          python-version: '3.11'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Run Codex ZCode and ZCode tests
         shell: bash
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          roots = sorted(Path('.agents/skills').glob('*/SKILL.md'))
-          expected = {
-              'codex-native-orchestrator',
-              'codex-external-provider',
-              'codex-harness-bridge',
-          }
-          assert {path.parent.name for path in roots} == expected, roots
-          PY
-          for skill in codex-external-provider codex-harness-bridge; do
-            python -B -m unittest discover -s ".agents/skills/$skill/tests" -p 'test_*.py' -q
-          done
-      - name: Run installer tests only on explicit manual dispatch
+          python -B -m unittest discover -s .agents/skills/codex-zcode/tests -p 'test_*.py' -q
+          node --test .agents/skills/codex-zcode/tests/*.test.mjs
+          python -B -m unittest discover -s zcode/tests -p 'test_*.py' -q
+      - name: Run Native installer tests only on explicit manual dispatch
         if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-native-orchestrator/tests -p 'test_*.py' -q
-          python -B -m unittest discover -s zcode/tests -p 'test_*.py' -q

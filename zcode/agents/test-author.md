@@ -2,8 +2,6 @@
 name: "test-author"
 description: "按规划者判断，为重要行为缺口补最小必要测试。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob", "Edit", "Write", "Bash"]
 injectAgentsMd: true
 ---

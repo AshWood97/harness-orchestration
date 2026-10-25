@@ -2,8 +2,6 @@
 name: "code-reviewer"
 description: "对照需求检查实际结果，指出具体问题，保持只读。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob"]
 injectAgentsMd: true
 ---

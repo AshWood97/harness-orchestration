@@ -2,8 +2,6 @@
 name: "debugger"
 description: "诊断已发现且原因不明的具体缺陷。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob"]
 injectAgentsMd: true
 ---

@@ -1,5 +1,5 @@
 {
-  "package_version": "4.1.0",
+  "package_version": "5.0.0",
   "custom_roles": [
     "code-reviewer",
     "debugger",
@@ -14,9 +14,10 @@
     "general-purpose"
   ],
   "model_policy": {
-    "display_name": "Gemini 3.8 Flash",
-    "thoughtLevel": "high",
-    "model_id": "set using your ZCode provider-id/model-id"
+    "default": "inherit",
+    "model_override": "optional --model provider-id/model-id",
+    "thought_level_override": "optional --thought-level; requires --model",
+    "built_in_overrides": "preserve unless --reset-builtin-models is requested"
   },
   "max_concurrency": 4,
   "workflow": [

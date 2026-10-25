@@ -8,32 +8,51 @@ Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
 
 ## 中文
 
-这个仓库提供三个**独立安装、独立选择**的 Codex skill、一套 [ZCode 角色编排包](zcode/README.md)，以及包含 14 个角色和按需自动编排 skill 的 [Qoder 插件](qoder/README.md)。仓库现名为 [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration)，曾用名为 `codex-three-paths`、`codex-zcode-orchestration`，便于后续继续接入其他 Harness；现有 Codex skill 标识、安装路径和 ZCode 入口保持不变。安装三个 Codex skill 后，技能菜单仍显示三个选项，按任务选择即可。
+这个仓库提供两个独立安装、按任务选择的 Codex skill、一套 [ZCode 角色编排包](zcode/README.md)，以及 [Qoder 插件](qoder/README.md)。仓库现名为 [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration)，曾用名为 `codex-three-paths`、`codex-zcode-orchestration`。
 
 | Skill | 用途 |
 | --- | --- |
-| [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | 由规划者评估任务并按需选择角色，完成实现与检查，尽量少做额外测试。 |
-| [Codex External Provider](.agents/skills/codex-external-provider/SKILL.md) | 在**会话启动时**已配置外部 Responses API provider 的前提下，检查当前会话及原生 agent 的路由。 |
-| [Codex Harness Bridge](.agents/skills/codex-harness-bridge/SKILL.md) | 把一个有明确边界的任务交给已配置的独立编码 CLI，并由当前 Codex 会话检查结果。 |
+| [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | 由规划者按需选择原生 Codex 角色，完成实现与检查。 |
+| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | 由 Codex 规划、提交有明确边界的 ZCode 任务，并检查实际结果。 |
 
-三者可以组成工作流程，但不会自动混用模型或偷偷切换 provider：按当前任务选一个 skill；如需在同一工作流程里调用独立 CLI，再明确使用 Harness Bridge。Native 与 External 的会话路由条件不同，不能把 External 当作在已启动的 Native 会话中切换 provider 的按钮。**完全混合路由是未来方向，目前未实现。**
+v5 移除了 **Codex External Provider** 和 **Codex Harness Bridge**，以 Codex ZCode 提供专用的 ZCode 接入。Native 的角色模型与工作流程、Qoder 插件保持不变。
 
 ### 安装
 
-在 Codex 中使用内置 `$skill-installer`，请它从本仓库一次安装下面三个路径：
+在 Codex 中使用内置 `$skill-installer`，从本仓库安装需要的路径：
 
 ```text
 仓库：AshWood97/harness-orchestration
 路径：.agents/skills/codex-native-orchestrator
-      .agents/skills/codex-external-provider
-      .agents/skills/codex-harness-bridge
+      .agents/skills/codex-zcode
 ```
 
-安装器将三个目录分别放入 `$CODEX_HOME/skills/`（默认 `~/.codex/skills/`）。在下一轮对话中，从技能菜单选一个即可；也可以明确写 `$codex-native-orchestrator`、`$codex-external-provider` 或 `$codex-harness-bridge`。如已有同名 skill，先检查现有安装，避免覆盖个人改动。
+skill 安装到 `${CODEX_HOME:-~/.codex}/skills/`。已有同名安装时先检查个人改动。安装 Codex ZCode 后，再执行运行时设置：
 
-建议使用 Python 3.11 或更新版本；External 的预检及测试要求至少 3.11。Native 的 skill 安装和命名 agent 配置是两步：安装器只安装 skill；按下方说明部署固定子代理角色后，再启动新会话。当前 Codex 主会话只负责协调，不属于技能配置的角色映射；调用技能不会改变用户选择的主会话模型。External 的 provider、模型目录和凭据只放在个人配置及环境变量中，参照[示例](.agents/skills/codex-external-provider/examples/user-config.example.toml)和[设置说明](.agents/skills/codex-external-provider/references/provider-setup.md)。Harness Bridge 的私有配置从[示例](.agents/skills/codex-harness-bridge/config.example.json)创建，参照[设置说明](.agents/skills/codex-harness-bridge/references/setup.md)；仅安装要用的 CLI。
+```sh
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/install.py --apply
+```
 
-#### Native 角色与流程
+Codex ZCode 需要 **Node.js 22.18+** 和 **Python 3.9+**。安装器使用固定版本的 [Sandyzzx/codex-zcode-bridge 1.2.7](https://github.com/Sandyzzx/codex-zcode-bridge) 共享核心，注册 MCP `codex_zcode`；独立设置位于 `$CODEX_HOME/codex-zcode/runtime-config.json`，任务状态位于同目录的 `state/`。`CODEX_HOME` 默认是 `~/.codex`，可用 `--codex-home` 指定。迁移时可加 `--retire-old-skills`，移除该目录下旧的 External Provider、Harness Bridge 和已安装的 `zcode-orchestrator` 原型；此选项须明确传入。
+
+Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分部署固定角色与入口，再开始新会话。调用 skill 不改变用户选择的主会话模型。
+
+### Codex ZCode 使用
+
+从技能菜单选择 **Codex ZCode**、用 `$codex-zcode` 加任务，或直接要求 Codex 使用 ZCode。讨论 ZCode、引用内容或普通任务复杂度不会启用它。实际的 ZCode 调用优先于 Ultra 自动 Native 路由。
+
+默认不传 `model` 或推理参数，沿用 ZCode 当前工作区新会话的默认值；只有用户为当前任务明确指定时才覆盖模型。续接任务保留原模型，换模型应新建任务。默认直接提交 JSON 任务书；指定模型时才查询目录：
+
+```sh
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py doctor
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py submit --file /absolute/path/to/task.json
+# 仅在明确选择模型时查询：
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models --workspace /absolute/path/to/workspace
+```
+
+`events`、`status`、`result` 用于跟踪和读取结果，`continue` 用于续接，`cancel` 用于取消；参数与任务格式见 [skill](.agents/skills/codex-zcode/SKILL.md)。运行时仅通过已配置的 ZCode 接口执行任务，不提供 computer-use、UI 或远程控制回退。
+
+### Native 角色与流程
 
 默认流程是 **充分考虑的计划 → 最小实现 → 一次针对需求的检查 → 有问题修改、没问题放行**。简单任务留在主会话；复杂任务只分派确实需要完成的部分。检查由主会话或一个 reviewer 负责，不重复做同一轮检查；修复后只看修复和直接影响。用户只要求 Review 时保持只读。
 
@@ -57,6 +76,8 @@ Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
 
 Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。两种入口使用完全相同的按需选择规则：多角色任务由 Conductor 评估，主会话派遣所需角色，没有固定的 Tester → Reviewer → Guardian 流水线。
 
+实际选择 **Codex ZCode**、用 `$codex-zcode` 加任务或直接要求使用 ZCode 时，该选择优先于 Ultra 的自动 Native 路由；只是讨论、引用或检查 ZCode 不算启用。
+
 安装后可将带标记的入口合并到个人 `CODEX_HOME/AGENTS.md`，保留其他规则；不加 `--apply` 时只显示是否需要更新：
 
 ```sh
@@ -69,9 +90,9 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### ZCode 角色编排
 
-[ZCode 安装说明](zcode/README.md)提供七个自定义角色，配合 Explore 和 general-purpose，模型保持 **Gemini 3.8 Flash / high**。主 Agent 承担规划者职责，采用相同的计划、执行、检查流程；可自行选择必要的测试或专项角色，尽量少做额外测试，无需用户逐个点名。
+[ZCode 角色包](zcode/README.md)独立于 Codex ZCode 接入，提供七个自定义角色，配合内置 Explore 和 general-purpose。默认省略模型与推理深度，继承 ZCode 当前会话设置。主 Agent 规划任务、按需选角色，采用相同的计划、执行、检查流程。
 
-安装器合并带标记的工作流并保留个人规则，不计算前后 hash 或生成备份凭据。模型的 provider 标识由使用者提供；内置角色仍在 ZCode 设置中配置。文档插件角色不属于本次代码编排。
+安装器默认不改内置角色的模型覆盖。`--model` 是可选覆盖，`--thought-level` 仅与 `--model` 一起使用；需要清理内置模型覆盖时明确传入 `--reset-builtin-models`。带标记的工作流合并保留个人规则，不计算 hash 或生成备份凭据；完整命令见 [ZCode 安装说明](zcode/README.md)。
 
 ### Qoder 角色编排
 
@@ -81,38 +102,57 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### 公开仓库与验证范围
 
-本仓库只包含源码、文档、占位符示例和测试。不要提交 API key、真实 provider URL、个人 `config.toml`、私有模型目录、任务 brief、运行日志或报告。External 的预检需要可信的运行时 provider/model 身份；配置检查本身不证明远端请求的实际路由。Harness Bridge 的适配器测试使用模拟 CLI，不代表所有真实 CLI 版本或服务端都已验证。DeepSeek Harness 仍是实验性支持。
+本仓库只包含源码、文档、占位符示例和测试。不要提交 API key、个人配置、私有模型目录、任务 brief、运行日志或报告。Codex ZCode 的测试验证本地协议和安装行为，不代表所有 ZCode 版本或在线服务均已验证。
 
-Native/ZCode/Qoder 的日常任务和仓库改动不自动触发测试矩阵。现有安装器测试保留供维护者明确选择执行；External Provider 与 Harness Bridge 的原有 CI 仅在它们自身路径发生变化时运行。见[变更记录](CHANGELOG.md)。
+CI 只对 Codex ZCode 与 `zcode/` 路径的改动运行相关测试，使用 macOS/Windows、Python 3.11 和 Node.js 24。Native 安装器测试保留为手动选择。日常编排任务不自动触发测试矩阵。见[变更记录](CHANGELOG.md)。
 
 ## English
 
-This repository contains three Codex skills that are **installed and selected independently**, a [ZCode role orchestration package](zcode/README.md), and a [Qoder plugin](qoder/README.md) with 14 roles and a skill for automatic orchestration when useful. The repository is now [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration), previously `codex-three-paths` and `codex-zcode-orchestration`, leaving room for future harness adapters. Existing Codex skill identifiers, installation paths, and ZCode entrypoints are preserved. Installing the three Codex skills adds three entries to the picker; select the one needed for the task.
+This repository provides two Codex skills installed and selected independently, a [ZCode role package](zcode/README.md), and a [Qoder plugin](qoder/README.md). The repository is [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration), previously `codex-three-paths` and `codex-zcode-orchestration`.
 
 | Skill | Purpose |
 | --- | --- |
-| [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | Let the planner select necessary native roles for implementation and inspection, minimizing extra tests. |
-| [Codex External Provider](.agents/skills/codex-external-provider/SKILL.md) | Check routing for a Codex session and native agents **started with** a configured external Responses API provider. |
-| [Codex Harness Bridge](.agents/skills/codex-harness-bridge/SKILL.md) | Send one bounded job to a configured coding CLI and review its evidence from the current Codex session. |
+| [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | Let the planner select native Codex roles for scoped implementation and inspection. |
+| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | Plan in Codex, submit bounded ZCode tasks, and inspect their actual results. |
 
-The skills can participate in one workflow, but they do not automatically mix models or switch providers. Select a skill for the current task and explicitly invoke Harness Bridge if a bounded subprocess is useful. Native and External have different session routing requirements; External cannot change the provider of a session that has already started. **Fully mixed routing is a possible future enhancement, not a current feature.**
+Version 5 removes **Codex External Provider** and **Codex Harness Bridge** in favor of the dedicated Codex ZCode integration. Native role models and workflow, and the Qoder plugin, remain unchanged.
 
 ### Install
 
-In Codex, ask the built-in `$skill-installer` to install these three paths from this repository:
+Ask the built-in `$skill-installer` in Codex to install the paths you need from this repository:
 
 ```text
 Repository: AshWood97/harness-orchestration
 Paths: .agents/skills/codex-native-orchestrator
-       .agents/skills/codex-external-provider
-       .agents/skills/codex-harness-bridge
+       .agents/skills/codex-zcode
 ```
 
-The installer places each directory in `$CODEX_HOME/skills/` (default `~/.codex/skills/`). On the next turn, select one from the skill picker, or invoke `$codex-native-orchestrator`, `$codex-external-provider`, or `$codex-harness-bridge` directly. Inspect any existing skill with the same name before updating it so local changes are preserved.
+Skills install into `${CODEX_HOME:-~/.codex}/skills/`. Inspect an existing installation before replacing personal changes. After installing Codex ZCode, set up its runtime:
 
-Python 3.11 or newer is recommended; External preflight and tests require at least 3.11. Installing the Native skill and configuring named agents are separate steps: the installer adds the skill, while the deployment below installs the fixed subagent roles. The current Codex session coordinates work but is not one of the skill's named roles; invoking the skill does not change its selected model. Start a new session after deployment. Keep External provider settings, model catalogs, and credentials in user configuration and environment variables, using the [example](.agents/skills/codex-external-provider/examples/user-config.example.toml) and [setup guide](.agents/skills/codex-external-provider/references/provider-setup.md). Create a private Harness Bridge configuration from its [example](.agents/skills/codex-harness-bridge/config.example.json) and [setup guide](.agents/skills/codex-harness-bridge/references/setup.md); install only the CLIs you plan to use.
+```sh
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/install.py --apply
+```
 
-#### Native roles and workflow
+Codex ZCode requires **Node.js 22.18+** and **Python 3.9+**. Setup uses the pinned [Sandyzzx/codex-zcode-bridge 1.2.7](https://github.com/Sandyzzx/codex-zcode-bridge) shared core and registers MCP `codex_zcode`. It keeps independent settings at `$CODEX_HOME/codex-zcode/runtime-config.json` and task state in the adjacent `state/` directory. `CODEX_HOME` defaults to `~/.codex`; use `--codex-home` to select another home. Explicitly pass `--retire-old-skills` during migration to remove the installed External Provider, Harness Bridge and `zcode-orchestrator` prototype from that home.
+
+Native skill installation and named-agent configuration are separate steps. Deploy its fixed roles and entrypoint as described below, then start a new session. Invoking the skill does not change the selected host model.
+
+### Use Codex ZCode
+
+Select **Codex ZCode** in the skill menu, invoke `$codex-zcode` with a task, or directly ask Codex to use ZCode. Discussion, quoted content and ordinary task complexity do not activate it. An actual ZCode invocation takes priority over automatic Native routing in Ultra.
+
+Omit `model` and reasoning parameters by default to inherit the ZCode workspace's new-session defaults. Override the model only when the user explicitly selects one for the task. Continuations retain the original model; use a new task to change it. Submit a JSON task file directly; inspect the catalog only for an explicit model selection:
+
+```sh
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py doctor
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py submit --file /absolute/path/to/task.json
+# Only for an explicit model selection:
+python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models --workspace /absolute/path/to/workspace
+```
+
+Use `events`, `status` and `result` to track work and read results, `continue` to resume, and `cancel` to cancel. See the [skill](.agents/skills/codex-zcode/SKILL.md) for arguments and task format. The runtime uses the configured ZCode interface with no computer-use, UI or remote-control fallback.
+
+### Native roles and workflow
 
 Use **plan → implement → inspect once → fix concrete issues or deliver**. Understand the requirements and relevant source before editing. Keep simple work in the host and delegate only necessary parts of the requested implementation. One owner, either the host or reviewer, inspects the result and directly affected callers. After a repair, inspect that repair and its effects; reuse unchanged conclusions. Review-only requests never authorize edits.
 
@@ -136,15 +176,17 @@ Keep `allow_implicit_invocation: false`. Select **Codex Native Orchestration** i
 
 The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. Both entrypoints use the same planner-led selection: Conductor assesses multi-role work, the host dispatches the necessary roles, and no fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
 
+Selecting **Codex ZCode**, invoking `$codex-zcode` with a task, or directly asking to use ZCode takes priority over automatic Native routing in Ultra. Discussion, quotations and requests to inspect ZCode do not activate that override.
+
 Run `python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/install_activation.py --apply` to merge the marked personal AGENTS.md entrypoint, preserving other guidance. Omit `--apply` for a read-only check. It creates no digest, backup receipt or log.
 
 **Version 4 removes the old persistent CLI runner, hash evidence machinery and automatic final gate**, together with their dedicated schemas/tests. The old controller commands, including `native-begin`, `native-gate`, `run` and `revise-run`, are no longer available. Coordinate work through native agent tools. Historical run files remain untouched; reuse useful plans and results without a migration layer or replacement ledger.
 
 ### ZCode role orchestration
 
-The [ZCode package](zcode/README.md) retains seven custom roles plus built-in Explore and general-purpose, all using **Gemini 3.8 Flash / high**. The host acts as planner, selects any roles needed for concrete in-scope questions, and chooses one owner per check. It may select test or specialist roles without user naming, while minimizing extra tests and avoiding repeated review.
+The [ZCode role package](zcode/README.md) is independent of the Codex ZCode integration. It supplies seven custom roles alongside built-in Explore and general-purpose. Model and reasoning-depth overrides are omitted by default so roles inherit the current ZCode session settings. The host plans, selects necessary roles, implements and inspects the result.
 
-The installer merges marked guidance, preserves surrounding personal rules and creates no digest or backup receipt. Supply your own provider/model identifier; set built-in role models in ZCode settings. Document-plugin roles are outside this coding workflow.
+Installation leaves built-in model overrides intact by default. `--model` is optional, and `--thought-level` requires `--model`; explicitly use `--reset-builtin-models` to clear built-in model overrides. Marked guidance preserves surrounding personal rules without hashes or backup receipts. See the [ZCode installation guide](zcode/README.md) for commands.
 
 ### Qoder role orchestration
 
@@ -154,10 +196,6 @@ Import the ZIP in Qoder CN through **Extensions → Plugins → Add Plugin → U
 
 ### Public repository and verification limits
 
-This repository contains only source code, documentation, placeholder examples, and tests. Do not commit API keys, real provider URLs, personal `config.toml`, private model catalogs, task briefs, run logs, or reports. External preflight requires trusted runtime provider/model identity; a configuration check alone does not prove remote request routing. Harness Bridge adapter tests use stub CLIs and do not establish compatibility with every live CLI version or service. DeepSeek Harness support remains experimental.
+This repository contains source, documentation, placeholder examples and tests. Do not commit API keys, personal configuration, private model catalogs, task briefs, run logs or reports. Codex ZCode tests cover local protocol and installation behavior; they do not establish compatibility with every ZCode release or live service.
 
-Native/ZCode/Qoder tasks and repository changes do not automatically trigger test matrices. Existing installer tests remain available for an explicitly chosen maintenance run. External Provider and Harness Bridge retain CI only for changes to their own paths. See the [changelog](CHANGELOG.md).
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+CI runs relevant checks for changes under Codex ZCode and `zcode/`, using macOS/Windows, Python 3.11 and Node.js 24. Native installer tests remain manually selectable. Everyday orchestration does not automatically trigger a test matrix. See the [changelog](CHANGELOG.md).

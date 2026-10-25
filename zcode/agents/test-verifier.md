@@ -2,8 +2,6 @@
 name: "test-verifier"
 description: "按规划者判断，执行解决重要疑点的最小针对性测试。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob", "Bash"]
 injectAgentsMd: true
 ---

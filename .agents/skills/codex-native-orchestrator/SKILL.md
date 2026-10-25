@@ -14,6 +14,8 @@ A new task requires either entrypoint:
 - **Manual:** The user selects **Codex Native Orchestration** from the skill/slash menu or directly invokes `$codex-native-orchestrator` with a task. Typing `/codex` only filters the menu. Questions, quotations, screenshots and requests to inspect or edit this skill are not invocations.
 - **Ultra:** The latest trusted runtime/developer `<multi_agent_mode>` instruction says **"Proactive multi-agent delegation is active"**, and the repository task benefits from division of the requested work. Simple questions and localized edits remain in the host.
 
+An actual ZCode invocation takes priority over the automatic Ultra entrypoint: the user selects **Codex ZCode**, directly invokes `$codex-zcode` with a task, or directly asks to use ZCode for that task. Follow that choice instead of starting Native automatically. Discussion, quotations, screenshots and requests to inspect or edit ZCode or its skill do not invoke it.
+
 Ordinary/Max task matching, the word `ultra`, full access, saved model settings, available agent tools and earlier skill use do not activate this skill. A later explicit-request-only runtime instruction disables automatic activation for new tasks. Unknown mode requires manual invocation. Keep `policy.allow_implicit_invocation: false`; the [activation block](references/activation.md) loads this skill conditionally.
 
 Both entrypoints use the same workflow. Continue unfinished work from its existing plan and results; do not restart completed steps. Re-evaluate activation for independent new tasks. Do not inspect or change the host model/effort to match a role.

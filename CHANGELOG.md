@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.0.0 — 2026-10-25
+
+- Preserve the Windows PowerShell module-analysis cache environment variable so identity queries do not cold-start and time out. Handle early cancellation by waiting for the same attempt's persisted process identities before retrying core cancellation; preserve process-tree verification and other failures.
+
+- **Breaking:** remove the Codex External Provider and Codex Harness Bridge skill packages. Add **Codex ZCode** at `.agents/skills/codex-zcode`, installed as `codex-zcode` with its own settings and state.
+- Use the pinned `Sandyzzx/codex-zcode-bridge` 1.2.7 shared core with Node.js 22.18+, a Python 3.9+ helper and MCP `codex_zcode`. Provide setup, diagnostics, model discovery and task submit/events/status/result/continue/cancel commands without computer-use, UI or remote-control fallback.
+- Activate Codex ZCode only through its selected skill, `$codex-zcode`, or a direct request to use ZCode. An actual invocation takes priority over automatic Native routing in Ultra; discussion and quoted content do not. Preserve Native role models and workflow and leave Qoder unchanged.
+- Inherit ZCode workspace session model/reasoning defaults unless the user explicitly selects a task model. Keep that model on continuation; changing it requires a new task. Make the separate ZCode role installer inherit by default, with optional model/depth overrides and an explicit built-in-model reset.
+- Replace retired-package CI with focused Codex ZCode and ZCode checks on macOS/Windows using Python 3.11 and Node.js 24. Keep Native installer checks manually selectable and preserve historical entries below.
+
 ## 4.3.0 — 2026-10-21
 
 - Update Qoder plugin and skill to **1.1.0**: Default Agent conversations automatically orchestrate actual complex engineering work when division helps. Keep simple Q&A and clear localized edits in the host; do not infer complexity from text length or file count.

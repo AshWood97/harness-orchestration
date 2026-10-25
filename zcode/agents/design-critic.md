@@ -2,8 +2,6 @@
 name: "design-critic"
 description: "由规划者按需选择，解决重要且未确定的设计取舍。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob"]
 injectAgentsMd: true
 ---

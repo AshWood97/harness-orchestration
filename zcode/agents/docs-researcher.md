@@ -2,8 +2,6 @@
 name: "docs-researcher"
 description: "查清当前实现必需的外部 API、版本和上游事实。"
 color: yellow
-model: "__ZCODE_MODEL_ID__"
-thoughtLevel: high
 tools: ["Read", "Grep", "Glob", "WebSearch", "WebFetch"]
 injectAgentsMd: true
 ---

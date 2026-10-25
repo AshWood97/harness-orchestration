@@ -58,31 +58,3 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-native-orchestrator/tests -p 'test_*.py' -q
-      - name: Diagnose Windows identity query after a failure
-        if: ${{ failure() && runner.os == 'Windows' && steps.runtime_setup.outcome == 'success' }}
-        shell: bash
-        run: |
-          node --input-type=module <<'JS'
-          import { spawnSync } from 'node:child_process';
-          const keys = new Set(['PATH','SYSTEMROOT','WINDIR','COMSPEC','PATHEXT','TEMP','TMP','USERPROFILE','HOMEDRIVE','HOMEPATH','APPDATA','LOCALAPPDATA','PROGRAMDATA','OS','PROCESSOR_ARCHITECTURE','NUMBER_OF_PROCESSORS','PROGRAMFILES','PROGRAMFILES(X86)']);
-          const minimal = Object.fromEntries(Object.entries(process.env).filter(([k]) => keys.has(k.toUpperCase())));
-          const query = `$ErrorActionPreference = 'Stop'; Get-Process -Id ${process.pid} -ErrorAction SilentlyContinue | ForEach-Object { "{0}|{1}" -f $_.Id, $_.StartTime.Ticks }; 'bridge_probe_complete_v1'`;
-          const entries = Object.entries(process.env).filter(([k]) => !keys.has(k.toUpperCase()));
-          const deadline = Date.now() + 90000;
-          const works = values => {
-            const p = spawnSync('powershell.exe', ['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-Command',query], { env:{...minimal,...Object.fromEntries(values)}, encoding:'utf8', timeout:3000, windowsHide:true });
-            return p.status === 0 && !p.stderr && p.stdout.trim().endsWith('bridge_probe_complete_v1');
-          };
-          let candidates = entries, partitions = 2;
-          console.log(JSON.stringify({ full:works(entries), minimal:works([]), candidate_keys:entries.length }));
-          while (candidates.length && Date.now() < deadline) {
-            const size = Math.ceil(candidates.length / partitions);
-            let reduced = false;
-            for (let i=0;i<candidates.length && Date.now()<deadline;i+=size) {
-              const complement = candidates.filter((_,j) => j<i || j>=i+size);
-              if (works(complement)) { candidates=complement; partitions=Math.max(2,partitions-1); reduced=true; break; }
-            }
-            if (!reduced) { if(partitions>=candidates.length) break; partitions=Math.min(candidates.length,partitions*2); }
-          }
-          console.log(JSON.stringify({ required_environment_keys:candidates.map(([k])=>k), verified:works(candidates), timed_out:Date.now()>=deadline }));
-          JS

@@ -2,7 +2,7 @@
 
 ## 5.0.0 — 2026-10-25
 
-- Handle early Windows cancellation by waiting for the same attempt's persisted process identities before retrying the core cancellation; preserve process-tree verification and other failures.
+- Preserve the Windows PowerShell module-analysis cache environment variable so identity queries do not cold-start and time out. Handle early cancellation by waiting for the same attempt's persisted process identities before retrying core cancellation; preserve process-tree verification and other failures.
 
 - **Breaking:** remove the Codex External Provider and Codex Harness Bridge skill packages. Add **Codex ZCode** at `.agents/skills/codex-zcode`, installed as `codex-zcode` with its own settings and state.
 - Use the pinned `Sandyzzx/codex-zcode-bridge` 1.2.7 shared core with Node.js 22.18+, a Python 3.9+ helper and MCP `codex_zcode`. Provide setup, diagnostics, model discovery and task submit/events/status/result/continue/cancel commands without computer-use, UI or remote-control fallback.

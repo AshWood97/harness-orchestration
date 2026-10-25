@@ -2,5 +2,11 @@
   "repository": "https://github.com/Sandyzzx/codex-zcode-bridge",
   "revision": "0e74ee1c64b179752a24317574916a98c77a5ef1",
   "version": "1.2.7",
-  "integration": "Unmodified shared core bundled with this skill's host/worker policy adapters. Browser backend is not distributed or enabled."
+  "integration": "Shared core bundled with this skill's host/worker policy adapters. Browser backend is not distributed or enabled.",
+  "patches": [
+    {
+      "file": "src/runtime/child-env.ts",
+      "change": "Preserve the non-secret PSMODULEANALYSISCACHEPATH Windows environment variable to prevent cold command-discovery timeouts."
+    }
+  ]
 }

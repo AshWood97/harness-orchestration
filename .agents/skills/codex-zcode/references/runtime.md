@@ -1,6 +1,6 @@
 # 运行时来源与维护
 
-本技能使用 [Sandyzzx/codex-zcode-bridge](https://github.com/Sandyzzx/codex-zcode-bridge) 1.2.7 的公开共享核心，具体提交记录在 runtime/UPSTREAM.json。核心源代码未改动；src/host.mjs、worker.mjs 和 policy.mjs 是本项目的适配层。分发时保留核心 Apache-2.0 LICENSE、NOTICE 及依赖许可证。
+本技能使用 [Sandyzzx/codex-zcode-bridge](https://github.com/Sandyzzx/codex-zcode-bridge) 1.2.7 的公开共享核心，具体提交及补丁记录在 runtime/UPSTREAM.json。Windows 环境白名单增加 PSModuleAnalysisCachePath，避免 PowerShell 命令发现丢失现有缓存而超时；其余核心源代码未改动。src/ 下是本项目的宿主适配层。分发时保留核心 Apache-2.0 LICENSE、NOTICE 及依赖许可证。
 
 适配层为独立 CODEX_HOME 配置提供 MCP/worker 入口，清除继承环境里的旧桥接配置，只接受当前安装配置。配置内出现持久模型覆盖或启用浏览器时明确拒绝；持久默认模型写入接口也拒绝操作。每个 worker 再执行相同检查，沿用上游任务、会话、事件和取消机制。
 

@@ -1,6 +1,6 @@
 Codex ZCode distribution note
 
-This distribution includes the shared core and the host/worker adapters. It omits the optional browser backend and playwright-core described in the unmodified upstream notice below.
+This distribution includes the shared core and the host/worker adapters. The Windows child environment allowlist is modified to preserve PSModuleAnalysisCachePath; all other core source is unchanged. It omits the optional browser backend and playwright-core described in the unmodified upstream notice below.
 
 --- Upstream NOTICE ---
 

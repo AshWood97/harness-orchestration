@@ -23,6 +23,19 @@ const shared = {
   minify: true, legalComments: "eof", packages: "bundle",
   alias: { "codex-zcode-bridge/core": path.join(upstream, "src", "core.ts") },
   nodePaths: [path.join(upstream, "node_modules")],
+  plugins: [{
+    name: "preserve-windows-powershell-cache",
+    setup(builder) {
+      builder.onLoad({ filter: /[\\/]runtime[\\/]child-env\.ts$/ }, async args => {
+        const original = await readFile(args.path, "utf8");
+        const anchor = '  "OS", "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS",';
+        if (original.split(anchor).length !== 2) throw new Error("Pinned Windows environment patch no longer matches");
+        // Windows command discovery can take >20s without the inherited cache.
+        // Preserve this non-secret OS path; keep the remaining allowlist intact.
+        return { contents: original.replace(anchor, anchor + '\n  "PSMODULEANALYSISCACHEPATH",'), loader: "ts" };
+      });
+    },
+  }],
 };
 await Promise.all([
   build({ ...shared, entryPoints: [path.join(skill, "src", "host.mjs")], outfile: path.join(runtime, "dist", "bridge.mjs") }),
@@ -31,7 +44,7 @@ await Promise.all([
 const plugin = path.join(upstream, "plugins", "codex-zcode-bridge");
 await copyFile(path.join(plugin, "LICENSE"), path.join(runtime, "LICENSE"));
 await writeFile(path.join(runtime, "NOTICE"),
-  "Codex ZCode distribution note\n\nThis distribution includes the shared core and the host/worker adapters. It omits the optional browser backend and playwright-core described in the unmodified upstream notice below.\n\n--- Upstream NOTICE ---\n\n" +
+  "Codex ZCode distribution note\n\nThis distribution includes the shared core and the host/worker adapters. The Windows child environment allowlist is modified to preserve PSModuleAnalysisCachePath; all other core source is unchanged. It omits the optional browser backend and playwright-core described in the unmodified upstream notice below.\n\n--- Upstream NOTICE ---\n\n" +
   await readFile(path.join(plugin, "NOTICE"), "utf8"));
 await mkdir(path.join(runtime, "licenses"), { recursive: true });
 for (const name of await readdir(path.join(plugin, "licenses"))) {
@@ -40,6 +53,7 @@ for (const name of await readdir(path.join(plugin, "licenses"))) {
 await writeFile(path.join(runtime, "package.json"), JSON.stringify({ name: "codex-zcode-runtime", version: "5.0.0", type: "module", private: true }, null, 2) + "\n");
 await writeFile(path.join(runtime, "UPSTREAM.json"), JSON.stringify({
   repository: "https://github.com/Sandyzzx/codex-zcode-bridge", revision, version: "1.2.7",
-  integration: "Unmodified shared core bundled with this skill's host/worker policy adapters. Browser backend is not distributed or enabled.",
+  integration: "Shared core bundled with this skill's host/worker policy adapters. Browser backend is not distributed or enabled.",
+  patches: [{ file: "src/runtime/child-env.ts", change: "Preserve the non-secret PSMODULEANALYSISCACHEPATH Windows environment variable to prevent cold command-discovery timeouts." }],
 }, null, 2) + "\n");
 console.log("Built codex-zcode host and worker from pinned shared core (no browser backend).");

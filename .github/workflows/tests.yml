@@ -58,3 +58,19 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-native-orchestrator/tests -p 'test_*.py' -q
+      - name: Diagnose Windows identity query after a failure
+        if: ${{ failure() && runner.os == 'Windows' && steps.runtime_setup.outcome == 'success' }}
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { spawnSync } from 'node:child_process';
+          const keys = new Set(['PATH','SYSTEMROOT','WINDIR','COMSPEC','PATHEXT','TEMP','TMP','USERPROFILE','HOMEDRIVE','HOMEPATH','APPDATA','LOCALAPPDATA','PROGRAMDATA','OS','PROCESSOR_ARCHITECTURE','NUMBER_OF_PROCESSORS','PROGRAMFILES','PROGRAMFILES(X86)']);
+          const minimal = Object.fromEntries(Object.entries(process.env).filter(([k]) => keys.has(k.toUpperCase())));
+          const extra = new Set(['PSMODULEPATH','SYSTEMDRIVE','COMPUTERNAME','USERNAME','USERDOMAIN','PUBLIC','COMMONPROGRAMFILES','COMMONPROGRAMFILES(X86)','COMMONPROGRAMW6432','PROGRAMW6432']);
+          const expanded = { ...minimal, ...Object.fromEntries(Object.entries(process.env).filter(([k]) => extra.has(k.toUpperCase()))) };
+          const query = `$ErrorActionPreference = 'Stop'; Get-Process -Id ${process.pid} -ErrorAction SilentlyContinue | ForEach-Object { "{0}|{1}" -f $_.Id, $_.StartTime.Ticks }; 'bridge_probe_complete_v1'`;
+          for (const [name, env, command] of [['full-startup', process.env, "'ready'"], ['full-query', process.env, query], ['minimal-startup', minimal, "'ready'"], ['minimal-query', minimal, query], ['expanded-query', expanded, query]]) {
+            const p = spawnSync('powershell.exe', ['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-Command',command], { env, encoding:'utf8', timeout:8000, windowsHide:true });
+            console.log(JSON.stringify({ name, status:p.status, error:p.error?.message, stdout:p.stdout?.slice(0,1024), stderr:p.stderr?.slice(0,1024) }));
+          }
+          JS

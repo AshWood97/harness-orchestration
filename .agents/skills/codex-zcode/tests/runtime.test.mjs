@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
 import { hostProfile, runtimeEnvironment, MODEL_KEYS } from "../src/policy.mjs";
+import { cancelTask } from "../src/cancel.mjs";
 
 const skill = fileURLToPath(new URL("..", import.meta.url));
 const bridge = path.join(skill, "runtime", "dist", "bridge.mjs");
@@ -100,6 +101,28 @@ async function terminal(client, taskId) {
 function task(root, taskId, objective = "Fixture task") {
   return { task_id: taskId, workspace: root, objective, requirements: ["Do not delegate"], allowed_paths: [], forbidden_paths: [], acceptance_criteria: [], test_commands: [] };
 }
+
+test("early Windows cancel waits for worker-owned identity and preserves other failures", async () => {
+  const early = Object.assign(new Error("process_tree_root_identity_required"), { code: "CANCEL_FAILED" });
+  let calls = 0;
+  let ready = false;
+  const status = { attempt: 1, zcode_pid: 42 };
+  const result = { status: "cancelled" };
+  const manager = { cancelTask: async () => { if (++calls === 1) throw early; return result; } };
+  const store = {
+    readStatus: () => status,
+    readExecutorIdentity: () => ready ? { worker: { fingerprint: "owned-worker" }, runtime: { fingerprint: "owned-runtime" } } : null,
+  };
+  setTimeout(() => { ready = true; }, 5);
+  assert.equal(await cancelTask(manager, store, "task", { platform: "win32", waitMs: 500 }), result);
+  assert.equal(calls, 2);
+  calls = 0;
+  ready = false;
+  await assert.rejects(cancelTask(manager, store, "task", { platform: "win32", waitMs: 25 }), error => error === early);
+  assert.equal(calls, 1, "missing identity never authorizes a second core cancellation");
+  const unrelated = Object.assign(new Error("access denied"), { code: "CANCEL_FAILED" });
+  await assert.rejects(cancelTask({ cancelTask: async () => { throw unrelated; } }, store, "task", { platform: "win32" }), error => error === unrelated);
+});
 
 test("CODEX_HOME policy isolates stale model, storage and browser environment", async () => {
   const f = await fixture();

@@ -6,13 +6,15 @@ import {
   BridgeError,
 } from "codex-zcode-bridge/core";
 import { hostProfile, runtimeEnvironment, applyEnvironment } from "./policy.mjs";
+import { cancelTask } from "./cancel.mjs";
 
 const host = hostProfile(process.env, undefined,
   fileURLToPath(new URL("../worker/worker-main.mjs", import.meta.url)));
 applyEnvironment(runtimeEnvironment(host));
 const env = process.env;
+const store = new TaskStore(env.ZCODE_BRIDGE_DATA_DIR);
 const manager = new BridgeTaskManager({
-  store: new TaskStore(env.ZCODE_BRIDGE_DATA_DIR),
+  store,
   workspaceProvider: new DirectWorkspaceProvider(),
   maxConcurrentWorkers: Number(env.ZCODE_BRIDGE_MAX_CONCURRENT_WORKERS),
   spawnWorker: createWorkerSpawner(host), probe: createPlatformProbe(),
@@ -22,7 +24,16 @@ const refusePersistentModel = async () => {
   throw new BridgeError("provider_config_invalid", "Use zcode_task.model for an explicit task selection; codex-zcode always inherits ZCode defaults otherwise");
 };
 const server = createBridgeServer({
-  taskManager: manager,
+  taskManager: {
+    createTask: task => manager.createTask(task),
+    getStatus: id => manager.getStatus(id),
+    getResult: id => manager.getResult(id),
+    continueTask: input => manager.continueTask(input),
+    cancelTask: id => cancelTask(manager, store, id),
+    getEvents: input => manager.getEvents(input),
+    getFeedback: input => manager.getFeedback(input),
+    replyToInteraction: input => manager.replyToInteraction(input),
+  },
   doctor: () => runBridgeDoctor({ env, dataRoot: env.ZCODE_BRIDGE_DATA_DIR, resolver: { host } }),
   modelSettings: {
     listModels: workspace => settings.listModels(workspace),

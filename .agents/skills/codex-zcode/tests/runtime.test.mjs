@@ -208,7 +208,19 @@ test("permission roundtrip and running-task cancellation need only stdio", { tim
       next = page.next_seq;
     }
     assert.ok(sent, "runtime started before cancellation");
-    await client.call("zcode_cancel", { task_id: "cancel" });
+    try {
+      await client.call("zcode_cancel", { task_id: "cancel" });
+    } catch (error) {
+      // Fixture-only diagnostics distinguish missing/late identities from a
+      // Windows probe failure; no real account configuration is involved.
+      const dir = path.join(f.host.defaultDataRoot, ".tasks", "cancel");
+      const records = {};
+      for (const name of ["status.json", "attempts/1/executor-identity.json", "attempts/1/worker-stderr.log"]) {
+        records[name] = await readFile(path.join(dir, name), "utf8").catch(() => "not yet written");
+      }
+      console.error("Cancellation fixture records:", JSON.stringify(records));
+      throw error;
+    }
     assert.equal((await terminal(client, "cancel")).status.status, "cancelled");
   } finally {
     for (const taskId of ["permission", "cancel"]) {

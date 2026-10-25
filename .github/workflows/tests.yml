@@ -39,8 +39,8 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-zcode/tests -p 'test_*.py' -q
-          node --test .agents/skills/codex-zcode/tests/*.test.mjs
           python -B -m unittest discover -s zcode/tests -p 'test_*.py' -q
+          node --test .agents/skills/codex-zcode/tests/*.test.mjs
       - name: Run Native installer tests only on explicit manual dispatch
         if: github.event_name == 'workflow_dispatch'
         shell: bash

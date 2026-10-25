@@ -21,6 +21,8 @@ permissions:
 jobs:
   unittest:
     runs-on: ${{ matrix.os }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     strategy:
       fail-fast: false
       matrix:
@@ -31,15 +33,23 @@ jobs:
         with:
           python-version: '3.11'
       - uses: actions/setup-node@v6
+        id: runtime_setup
         with:
           node-version: '24'
-      - name: Run Codex ZCode and ZCode tests
+      - name: Run Codex ZCode installer tests
+        if: ${{ !cancelled() && steps.runtime_setup.outcome == 'success' }}
         shell: bash
-        env:
-          PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-zcode/tests -p 'test_*.py' -q
+      - name: Run ZCode role installer tests
+        if: ${{ !cancelled() && steps.runtime_setup.outcome == 'success' }}
+        shell: bash
+        run: |
           python -B -m unittest discover -s zcode/tests -p 'test_*.py' -q
+      - name: Run bundled runtime protocol tests
+        if: ${{ !cancelled() && steps.runtime_setup.outcome == 'success' }}
+        shell: bash
+        run: |
           node --test .agents/skills/codex-zcode/tests/*.test.mjs
       - name: Run Native installer tests only on explicit manual dispatch
         if: github.event_name == 'workflow_dispatch'

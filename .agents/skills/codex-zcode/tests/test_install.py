@@ -131,7 +131,8 @@ class InstallTests(unittest.TestCase):
             self.assertEqual(backup.read_bytes(), originals[source])
             self.assertEqual(backup.relative_to(self.home / "codex-zcode/backups").parts[1:],
                              ("files",) + source.relative_to(self.home).parts)
-            self.assertEqual(stat.S_IMODE(backup.stat().st_mode), 0o600)
+            if os.name != "nt":  # Windows chmod does not implement POSIX permission bits.
+                self.assertEqual(stat.S_IMODE(backup.stat().st_mode), 0o600)
         backups = sorted((self.home / "codex-zcode/backups").rglob("*"))
         repeat = self.configure(apply=True)
         self.assertEqual(repeat["changed_files"], [])

@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, writeFile, copyFile, rm } from "node:fs/promi
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createInterface } from "node:readline";
 import { once } from "node:events";
 import { hostProfile, runtimeEnvironment, MODEL_KEYS } from "../src/policy.mjs";
@@ -219,6 +219,13 @@ test("permission roundtrip and running-task cancellation need only stdio", { tim
         records[name] = await readFile(path.join(dir, name), "utf8").catch(() => "not yet written");
       }
       console.error("Cancellation fixture records:", JSON.stringify(records));
+      if (process.platform === "win32") {
+        const allowed = new Set(["PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "OS", "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS", "PROGRAMFILES", "PROGRAMFILES(X86)"]);
+        const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => allowed.has(key.toUpperCase())));
+        const script = `$ErrorActionPreference = 'Stop'; Get-Process -Id ${process.pid} -ErrorAction SilentlyContinue | ForEach-Object { "{0}|{1}" -f $_.Id, $_.StartTime.Ticks }; 'bridge_probe_complete_v1'`;
+        const probe = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script], { env, encoding: "utf8", timeout: 10000, windowsHide: true });
+        console.error("Windows identity-query diagnostic:", JSON.stringify({ status: probe.status, error: probe.error?.message, stdout: probe.stdout?.slice(0, 2048), stderr: probe.stderr?.slice(0, 2048) }));
+      }
       throw error;
     }
     assert.equal((await terminal(client, "cancel")).status.status, "cancelled");

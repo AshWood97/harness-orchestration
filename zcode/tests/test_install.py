@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -51,22 +52,48 @@ class InstallTests(unittest.TestCase):
                 self.assertIn('thoughtLevel: medium', text)
             self.assertEqual(install.configure(home, MODEL, thought_level='medium', apply=True)['changed_files'], [])
 
+    def test_crlf_templates_render_explicit_model_and_preserve_personal_guidance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            package = root / 'package'
+            (package / 'agents').mkdir(parents=True)
+            for role in install.ROLES:
+                name = role + '.md'
+                template = (install.PACKAGE / 'agents' / name).read_bytes().replace(b'\r\n', b'\n')
+                (package / 'agents' / name).write_bytes(template.replace(b'\n', b'\r\n'))
+            (package / 'AGENTS.md').write_bytes(b'Packaged guidance\r\n')
+            home = root / 'home'
+            home.mkdir()
+            prefix, suffix = b'\xef\xbb\xbfPersonal rule\r\n', b'\r\nPersonal suffix\r\n'
+            (home / 'AGENTS.md').write_bytes(prefix + install.START + b'\r\nold\r\n' + install.END + suffix)
+            with patch.object(install, 'PACKAGE', package):
+                install.configure(home, MODEL, thought_level='medium', apply=True)
+                for role in install.ROLES:
+                    data = (home / 'agents' / (role + '.md')).read_bytes()
+                    self.assertIn(('model: "' + MODEL + '"\n').encode('utf-8'), data)
+                    self.assertIn(b'thoughtLevel: medium\n', data)
+                    self.assertNotIn(b'\r\n', data)
+                guidance = (home / 'AGENTS.md').read_bytes()
+                self.assertTrue(guidance.startswith(prefix))
+                self.assertTrue(guidance.endswith(suffix))
+                self.assertEqual(install.configure(home, MODEL, thought_level='medium', apply=True)['changed_files'], [])
+
     def test_unmodified_legacy_roles_migrate_to_inheritance(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp).resolve()
             agents = home / 'agents'
             agents.mkdir()
             for role in install.ROLES:
-                template = (install.PACKAGE / 'agents' / (role + '.md')).read_bytes()
+                template = (install.PACKAGE / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
                 legacy = template.replace(b'tools:', b'model: "legacy-provider/legacy-model"\nthoughtLevel: high\ntools:', 1)
-                (agents / (role + '.md')).write_bytes(legacy)
+                (agents / (role + '.md')).write_bytes(legacy.replace(b'\n', b'\r\n'))
             result = install.configure(home)
             self.assertEqual(result['conflicting_roles'], [])
             self.assertEqual(len(result['changed_files']), 8)
             install.configure(home, apply=True)
             for role in install.ROLES:
                 name = role + '.md'
-                self.assertEqual((agents / name).read_bytes(), (install.PACKAGE / 'agents' / name).read_bytes())
+                self.assertEqual((agents / name).read_bytes(), (install.PACKAGE / 'agents' / name).read_bytes().replace(b'\r\n', b'\n'))
             self.assertEqual(install.configure(home, apply=True)['changed_files'], [])
 
     def test_modified_role_requires_explicit_replacement(self):
@@ -74,7 +101,7 @@ class InstallTests(unittest.TestCase):
             home = Path(tmp).resolve()
             install.configure(home, MODEL, apply=True)
             role = home / 'agents/code-reviewer.md'
-            customized = role.read_bytes() + b'\nMy customized reviewer\n'
+            customized = (role.read_bytes() + b'\nMy customized reviewer\n').replace(b'\n', b'\r\n')
             role.write_bytes(customized)
             result = install.configure(home, MODEL)
             self.assertEqual(result['conflicting_roles'], [str(role)])
@@ -113,7 +140,8 @@ class InstallTests(unittest.TestCase):
             }
             original = json.dumps(before).encode('utf-8')
             state.write_bytes(original)
-            state.chmod(0o640)
+            if os.name == 'posix':
+                state.chmod(0o640)
             preview = install.configure(home, reset_builtin_models=True)
             self.assertIn(str(state), preview['changed_files'])
             self.assertEqual(state.read_bytes(), original)
@@ -124,7 +152,8 @@ class InstallTests(unittest.TestCase):
                 for role in ('Explore', 'general-purpose'):
                     del expected[field][role]
             self.assertEqual(json.loads(state.read_bytes()), expected)
-            self.assertEqual(state.stat().st_mode & 0o777, 0o640)
+            if os.name == 'posix':
+                self.assertEqual(state.stat().st_mode & 0o777, 0o640)
             self.assertEqual(install.configure(home, reset_builtin_models=True, apply=True)['changed_files'], [])
 
     def test_reset_without_builtin_overrides_does_not_rewrite_state(self):
@@ -227,7 +256,7 @@ class InstallTests(unittest.TestCase):
             home = Path(tmp).resolve()
             install.configure(home, apply=True)
             first = home / 'agents/code-reviewer.md'
-            legacy = first.read_bytes().replace(b'tools:', b'model: "old/model"\nthoughtLevel: high\ntools:', 1)
+            legacy = first.read_bytes().replace(b'\r\n', b'\n').replace(b'tools:', b'model: "old/model"\nthoughtLevel: high\ntools:', 1).replace(b'\n', b'\r\n')
             first.write_bytes(legacy)
             guidance = home / 'AGENTS.md'
             original_guidance = b'prefix\n' + install.START + b'\nold managed guidance\n' + install.END + b'\nsuffix\n'

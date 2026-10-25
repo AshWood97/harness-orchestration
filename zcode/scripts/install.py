@@ -23,6 +23,8 @@ BUILTIN_OVERRIDE_FIELDS = ('builtInModelOverrides', 'builtInThoughtLevelOverride
 
 def is_legacy_role(original, template):
     """Recognize the shipped role with only its old model fields added."""
+    original = original.replace(b'\r\n', b'\n')
+    template = template.replace(b'\r\n', b'\n')
     lines = original.splitlines(keepends=True)
     if not lines or lines[0] != b'---\n':
         return False
@@ -107,7 +109,7 @@ def configure(home, model=None, *, thought_level=None, apply=False,
     templates = {}
     for role in ROLES:
         path = agents / (role + '.md')
-        template = (PACKAGE / 'agents' / (role + '.md')).read_bytes()
+        template = (PACKAGE / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
         templates[path] = template
         selection = ''
         if model is not None:

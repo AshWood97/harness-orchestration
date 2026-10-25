@@ -112,7 +112,7 @@ test("CODEX_HOME policy isolates stale model, storage and browser environment", 
       await writeFile(f.configFile, JSON.stringify({ ...f.config, ...patch }));
       assert.throws(() => runtimeEnvironment(f.host, f.env), /inherits ZCode defaults|browser hosting off/);
     }
-  } finally { await rm(f.root, { recursive: true, force: true }); }
+  } finally { await rm(f.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); }
 });
 
 test("bundled stdio host inherits runtime defaults, scopes override, resumes and survives caller restart", { timeout: 45000 }, async () => {
@@ -153,7 +153,11 @@ test("bundled stdio host inherits runtime defaults, scopes override, resumes and
     const launches = log.filter(message => message.argv);
     assert.ok(launches.every(message => message.argv.includes("app-server") && message.argv.includes("--stdio") && !message.secretPresent));
     assert.deepEqual(JSON.parse(await readFile(f.configFile)), f.config);
-  } finally { await client.close(); await rm(f.root, { recursive: true, force: true }); }
+  } finally {
+    await client.close();
+    // Windows retains a worker's cwd until its process has fully exited.
+    await rm(f.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  }
 });
 
 test("permission roundtrip and running-task cancellation need only stdio", { timeout: 30000 }, async () => {
@@ -189,6 +193,6 @@ test("permission roundtrip and running-task cancellation need only stdio", { tim
       await terminal(client, taskId).catch(() => {});
     }
     await client.close();
-    await rm(f.root, { recursive: true, force: true });
+    await rm(f.root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });

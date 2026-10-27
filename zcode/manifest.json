@@ -1,5 +1,5 @@
 {
-  "package_version": "5.0.0",
+  "package_version": "1.0.0",
   "custom_roles": [
     "code-reviewer",
     "debugger",
@@ -7,7 +7,10 @@
     "docs-researcher",
     "finding-validator",
     "test-author",
-    "test-verifier"
+    "test-verifier",
+    "scout",
+    "mechanic",
+    "check-runner"
   ],
   "built_in_roles": [
     "Explore",
@@ -27,8 +30,10 @@
     "repair_if_needed",
     "deliver"
   ],
-  "inspection_owner": "host_or_code-reviewer",
+  "inspection_owner": "one-owner-per-question-host-consolidates",
   "automatic_hashes": false,
-  "role_selection": "host-planner-selects-any-needed-role-within-user-scope",
-  "testing_policy": "minimal-targeted-only-for-important-unresolved-behavior"
+  "role_selection": "host-planner-selects-bounded-assignments-same-role-multiple-instances",
+  "testing_policy": "minimal-targeted-only-for-important-unresolved-behavior",
+  "parallel_dispatch": "fill-available-four-subagent-capacity-with-independent-ready-work",
+  "cross_checks": "distinct-concrete-functional-questions-only"
 }

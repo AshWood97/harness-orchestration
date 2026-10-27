@@ -1,22 +1,28 @@
-# ZCode 角色编排 / ZCode orchestration
+# ZCode 角色编排 v1.0.0 / ZCode orchestration
 
-默认流程：**充分考虑的计划 → 执行 → 检查 → 有问题修改、没问题放行**。主 Agent 评估任务、从全部角色中选取需要的角色，并保持一份计划；检查由主 Agent 或一个 code-reviewer 完成，不重复。Review 只读，修复只处理实现任务内的具体缺陷。完整边界见 [AGENTS.md](AGENTS.md)。
+主 Agent 规划、派发并整合结果，按需选择十个自定义角色和两个内置角色。角色默认继承会话模型与思考等级。每个自定义提示词明确职责、输入、方法、结果、停止条件和执行边界；每次任务再限定一个目标与相关上下文。完整工作流见 [AGENTS.md](AGENTS.md)。
 
-七个自定义角色默认省略模型和思考等级，继承主会话的选择。两个内置角色沿用 ZCode 的继承机制；已有个人覆盖默认保留：
+最多并发四个子代理，不含主 Agent，并服从实际运行时容量。有四项必要且独立的就绪任务就同时派发，允许同角色多个实例，空位出现后接续任务。独立文件且接口确定的实现可并行；共享写入和未完成依赖保持有序，不为凑满并发制造任务。
 
-| 角色 | 使用范围 |
+| 工作 | 角色与结果 |
 | --- | --- |
-| Explore（内置） | 查清当前任务相关源码和调用链 |
-| general-purpose（内置） | 在分配路径内实现最小改动 |
-| docs-researcher | 解决必要外部 API/版本事实 |
-| code-reviewer | 一次针对请求的只读检查 |
-| debugger | 诊断当前任务的具体不明缺陷，无自动轮数触发 |
-| design-critic | 规划者判断存在重要且未解决的设计取舍时使用 |
-| finding-validator | 规划者判断争议发现会影响结果时使用 |
-| test-author | 重要行为需要检查且现有用例缺失时，补最小测试 |
-| test-verifier | 重要行为无法通过源码和已有结果判断时，做最小针对性测试 |
+| 查清一个模块的实现和调用链 | Explore（内置）；位置、流程和具体未知项 |
+| 精确查询路径、符号或清单 | scout；所需事实和实际搜索范围 |
+| 按确定接口与行为实施修改 | general-purpose（内置）；仅修改分配文件 |
+| 按明确步骤完成机械修改 | mechanic；指定改动和未完成步骤 |
+| 解决必需的外部 API、版本或上游事实 | docs-researcher；一手来源、适用版本和答案 |
+| 检查一个具体功能问题 | 主 Agent 或 code-reviewer；一个问题一个负责人 |
+| 诊断已报告且原因不明的缺陷 | debugger；有依据的原因和最小修复方向 |
+| 解决一个未确定的设计取舍 | design-critic；具体后果、取舍和建议 |
+| 核验一条争议发现 | finding-validator；成立、不成立或尚无法确定 |
+| 补已分配的具体测试缺口 | test-author；最小用例 |
+| 用现有测试或最小复现回答行为疑点 | test-verifier；实际命令和观察结果 |
+| 原样执行有序命令清单 | check-runner；命令和实际结果，失败即停止 |
 
-规划者可按需选择所有角色，不要求用户逐个点名，也不把全部角色依次跑一遍。尽量少做额外测试，先阅读源码和结果，优先复用现有用例；重要问题仍无法判断才做最小测试，确有缺口才写新用例。不默认添加 hash、审核层、日志、证据包或未来抽象。默认一个写入者，最多四个子智能体；用户明确的不测试、只读等限制仍须遵守。只有超出用户任务范围才先征求同意。
+角色目录可选，不是每次必须执行的流水线。无需用户逐个点名角色；必要性判断不能覆盖用户的明确禁止。
+
+
+每个检查问题由一个负责人处理，主 Agent 汇总；交叉检查回答不同的具体功能问题。Review 只读，不设置自动最终审核。先读源码和已有结果，仅对重要且未解决的行为安排最小必要检查。禁止自行增加哈希、安全审查、防御包装、兼容层、未来抽象、重复 Review、额外测试或产物；超范围先询问。
 
 ## 安装
 
@@ -34,7 +40,7 @@ python zcode/scripts/install.py --apply
 
 `AGENTS.md` 的 `codex-zcode-orchestration:quality` 标记只包围本工作流，更新时替换该区块，标记外的个人规则保留。
 
-如需显式固定七个自定义角色的模型，仍可使用 `--model "your-provider/your-model" --apply`。单独指定模型不会固定思考等级；可额外加 `--thought-level`，其值应由所选模型支持，并且必须同时指定 `--model`。
+如需显式固定十个自定义角色的模型，仍可使用 `--model "your-provider/your-model" --apply`。单独指定模型不会固定思考等级；可额外加 `--thought-level`，其值应由所选模型支持，并且必须同时指定 `--model`。
 
 默认安装不会改动内置 Explore 和 general-purpose 的独立模型选择。需要恢复这两个角色的继承行为时，先预览，再应用：
 
@@ -47,10 +53,10 @@ python zcode/scripts/install.py --reset-builtin-models --apply
 
 ## English
 
-The host plans the requested work, implements the smallest change and chooses one checking owner. Inspect requirements, the actual result and directly affected callers. Fix concrete in-scope issues in implementation tasks; review-only tasks stay read-only. Deliver as soon as the request is satisfied.
+Version **1.0.0** provides ten custom roles alongside built-in Explore and general-purpose. The host plans, selects roles, dispatches assignments and consolidates results. Roles inherit the session model and thought level by default. Each custom prompt defines responsibility, inputs, method, result, stopping conditions and execution boundaries; each assignment supplies one narrow objective and relevant context.
 
-Custom roles inherit the host session's model and thought level by default. Existing built-in choices are preserved. The host planner may select any role for a concrete in-scope need without the user naming it. Minimize extra testing: inspect first, reuse existing results and prefer the smallest existing check; write new cases only for important gaps. Do not run every role, repeat reviews or add routine matrices, hash/evidence layers or extra artifacts. Explicit user prohibitions remain binding; scope expansions require a question before acting.
+Run at most four subagents concurrently, excluding the host and subject to runtime capacity. Dispatch independent ready work together, allow multiple instances of a role, and refill freed slots. Parallel writers need separately owned files and settled interfaces; shared writes and dependencies stay ordered. Do not create filler tasks. Assign one owner per concrete checking question, keep review read-only and use independent checks only for distinct functional questions.
 
-Run the installer without model arguments to inherit. `--model provider-id/model-id` remains available for an explicit custom-role override; optional `--thought-level` requires `--model` and otherwise stays unset. `--apply` installs; unchanged legacy templates migrate automatically, while customized roles require `--replace-existing`. Marked guidance preserves surrounding personal rules. Installation produces no digest, backup receipt or log.
+Install with Python 3.11+: run `python zcode/scripts/install.py` to preview, and add `--apply` to install. The default home is `~/.zcode`; select another with `--zcode-home`. Customized existing roles require explicit `--replace-existing`. The optional `--model provider-id/model-id` overrides custom-role inheritance; `--thought-level` requires `--model` and otherwise remains unset. Existing built-in choices are preserved unless `--reset-builtin-models` is explicitly requested. Marked guidance preserves surrounding personal rules. Installation creates no digest, backup receipt or log. Start a new session to load updated prompts.
 
-Use `--reset-builtin-models` to preview clearing only Explore/general-purpose entries from legacy model/thought maps and the current model-selection map in `v2/agents-state.json`; add `--apply` to write. Other state, plugin overrides and disabled IDs are preserved. The default run leaves built-in choices untouched. Writes are atomic and roll back on failure without overwriting concurrent edits. Start a new session after updating.
+Inspect source and reuse results before considering an extra test. No unsolicited security audits, defensive wrappers, compatibility layers, future abstractions, duplicate reviews or extra artifacts. Hashing requires the user's explicit request for publication, deduplication, cache-hit decisions or known-digest rejection and actual use by that operation. User prohibitions take precedence; ask before any scope expansion.

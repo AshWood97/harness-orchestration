@@ -95,7 +95,7 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### ZCode 角色编排
 
-[ZCode 角色包](zcode/README.md)独立于 Codex ZCode 接入，提供七个自定义角色，配合内置 Explore 和 general-purpose。默认省略模型与推理深度，继承 ZCode 当前会话设置。主 Agent 规划任务、按需选角色，采用相同的计划、执行、检查流程。
+[ZCode 角色包](zcode/README.md) v1.0.0 独立于 Codex ZCode 接入，提供十个自定义角色和内置 Explore、general-purpose，共十二种。新增 scout、mechanic、check-runner，分别承担精确检索、按步骤修改和指定命令执行。模型与思考等级默认继承当前会话。主 Agent 规划、派发并整合；最多并发四个子代理，允许同角色多个独立实例并接续空位。提示词明确职责、输入、方法、结果、停止条件和执行边界，每个检查问题一个负责人。
 
 安装器默认不改内置角色的模型覆盖。`--model` 是可选覆盖，`--thought-level` 仅与 `--model` 一起使用；需要清理内置模型覆盖时明确传入 `--reset-builtin-models`。带标记的工作流合并保留个人规则，不计算 hash 或生成备份凭据；完整命令见 [ZCode 安装说明](zcode/README.md)。
 
@@ -194,7 +194,7 @@ The old persistent CLI runner, hash evidence machinery and automatic final gate 
 
 ### ZCode role orchestration
 
-The [ZCode role package](zcode/README.md) is independent of the Codex ZCode integration. It supplies seven custom roles alongside built-in Explore and general-purpose. Model and reasoning-depth overrides are omitted by default so roles inherit the current ZCode session settings. The host plans, selects necessary roles, implements and inspects the result.
+The [ZCode role package](zcode/README.md) v1.0.0 is independent of the Codex ZCode integration. It supplies ten custom roles plus built-in Explore and general-purpose, for twelve role types. New scout, mechanic and check-runner roles handle exact retrieval, prescribed edits and specified commands. Models and thought levels inherit the session by default. The host plans, dispatches and consolidates up to four concurrent subagents, including multiple independent instances of a role, and refills freed slots. Prompts define responsibility, inputs, method, result, stopping conditions and execution boundaries; each checking question has one owner.
 
 Installation leaves built-in model overrides intact by default. `--model` is optional, and `--thought-level` requires `--model`; explicitly use `--reset-builtin-models` to clear built-in model overrides. Marked guidance preserves surrounding personal rules without hashes or backup receipts. See the [ZCode installation guide](zcode/README.md) for commands.
 

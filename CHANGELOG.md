@@ -1,5 +1,13 @@
 # Changelog
 
+## ZCode 1.0.0 — 2026-10-27
+
+- Expand ZCode to ten custom roles plus built-in Explore and general-purpose. Add scout for exact retrieval, mechanic for prescribed edits and check-runner for specified commands; retain session model and thought-level inheritance.
+- Focus each custom prompt on responsibility, inputs, method, result, stopping conditions and execution boundaries. Give each assignment one objective and relevant context.
+- Dispatch independent ready work within four concurrent subagents, excluding the host and subject to runtime capacity. Allow multiple instances of a role, refill freed slots and order shared writes and dependencies.
+- Use one owner per concrete checking question, distinct functional angles for independent checks, read-only review and no automatic final gate. Preserve the explicit user boundary against extra tests, hashes, security audits, defensive layers and artifacts.
+- Update the existing installer role list, version manifest and bilingual documentation. Publish the component as zcode-v1.0.0; preserve the Native v1.0.0 tag and release.
+
 ## 1.0.0 — 2026-10-27
 
 - Keep 14 Native role types. Move conductor to GPT-6 Astra/xhigh and explorer, researcher, worker and tester to GPT-6.1 Terra/max. Preserve the other role assignments and the user's host model.

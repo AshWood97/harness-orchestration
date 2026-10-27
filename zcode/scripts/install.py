@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install ZCode's seven code roles and merge their host workflow; dry-run by default."""
+"""Install ZCode's ten code roles and merge their host workflow; dry-run by default."""
 from __future__ import annotations
 
 import argparse
@@ -14,7 +14,8 @@ PACKAGE = Path(__file__).resolve().parents[1]
 START = b'<!-- codex-zcode-orchestration:quality:start -->'
 END = b'<!-- codex-zcode-orchestration:quality:end -->'
 ROLES = ('code-reviewer', 'test-verifier', 'design-critic', 'test-author',
-         'finding-validator', 'debugger', 'docs-researcher')
+         'finding-validator', 'debugger', 'docs-researcher',
+         'scout', 'mechanic', 'check-runner')
 BUILTINS = ('Explore', 'general-purpose')
 BUILTIN_OVERRIDE_FIELDS = ('builtInModelOverrides', 'builtInThoughtLevelOverrides',
                            'builtInModelSelectionOverrides')
@@ -175,7 +176,7 @@ def configure(home, model=None, *, thought_level=None, apply=False,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--zcode-home', type=Path, default=Path.home() / '.zcode')
-    parser.add_argument('--model', help='Optional provider-id/model-id override for the seven custom roles')
+    parser.add_argument('--model', help='Optional provider-id/model-id override for the ten custom roles')
     parser.add_argument('--thought-level', help='Optional thought-level override; requires --model')
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--replace-existing', action='store_true')

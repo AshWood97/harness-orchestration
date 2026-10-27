@@ -1,9 +1,17 @@
 # Bounded task packets
 
-Give each child one objective, the relevant requirements, source/context, owned paths for edits, constraints, dependencies and a concise expected result. Include the user's execution boundary. For mechanic, supply the exact edit recipe. For a specialist or test role, identify the concrete task question, why existing inspection/results are insufficient, and the smallest assigned scope. A planner selection within the user's request is sufficient; do not demand a separate user request naming that role. Respect explicit user prohibitions.
+Each child gets one objective and one narrow direction for this assignment. Use the role's persistent developer instructions for its working method and the task message for current facts. A frontend, service, caller or documentation focus is an assignment, not a new permanent role.
 
-Use existing chat results and readable diffs directly. Do not require baseline hashes, output digests, artifact signatures, logs, receipts or a separate packet file. Do not forward unrelated conversation history.
+Include only what the child needs:
 
-Children do only their packet and never delegate. Writers modify only their assigned paths. Reviewers, researchers and planners stay read-only. A review finding is not permission for the reviewer to fix code. Existing files and user edits outside the task remain untouched.
+- The question or requested behavior, and the condition that makes it complete.
+- Relevant requirements, files/symbols, known interfaces or external versions, and already established results.
+- Read scope, owned edit paths when applicable, dependencies and any concurrently edited neighboring scope.
+- The user's boundaries, including no-tests, read-only or other explicit restrictions.
+- The expected actual result: answer/change, necessary source locations, and a specific unresolved item if one remains.
 
-Return the actual change or answer with useful paths, concrete findings and any specific blocker. No ceremonial evidence bundle or duplicate check. For assigned commands, report the command and actual result in chat; do not create logs by default.
+Use a fresh child with only the packet context (`fork_turns="none"`) for narrow assignments when the runtime supports it. Reuse the same child for a continuation that benefits from its existing context. Do not forward unrelated conversation history. For mechanic, provide the exact edit recipe; for check_runner, the exact ordered command list. For a specialist or test, identify the concrete in-scope question and why existing inspection/results do not settle it. Planner selection of a necessary role does not require the user to name it, and never overrides a user prohibition.
+
+Children execute only their packet and never delegate. Writers modify only owned paths and preserve other edits. Planners, researchers and reviewers remain read-only; a finding is not permission to repair it. A missing interface decision or required input is a specific blocker to return to the host, not a reason to invent broader behavior or change models.
+
+Return the actual result with useful paths/symbols or primary-source links. Separate confirmed facts from inferences and unresolved questions. For assigned commands, give the command and observed outcome in chat. Stop once the completion condition is met. Do not create a packet file, hashes, signatures, evidence bundle, log or receipt unless the user explicitly requested that output within the skill's execution boundary.

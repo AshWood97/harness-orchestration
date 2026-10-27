@@ -15,7 +15,7 @@ Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | 由规划者按需选择原生 Codex 角色，完成实现与检查。 |
 | [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | 由 Codex 规划、提交有明确边界的 ZCode 任务，并检查实际结果。 |
 
-v5 移除了 **Codex External Provider** 和 **Codex Harness Bridge**，以 Codex ZCode 提供专用的 ZCode 接入。Native 的角色模型与工作流程、Qoder 插件保持不变。
+**v1.0.0** 更新 Native 的 14 个角色：Astra 负责规划和复杂判断，Terra 负责四类高频执行任务，并强化独立任务并发与窄范围提示词。手动技能与 Ultra 使用同一套编排。旧发布编号统一为 v0.x；v0.5.0 引入了专用的 Codex ZCode 接入。
 
 ### 安装
 
@@ -54,17 +54,22 @@ python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models 
 
 ### Native 角色与流程
 
-默认流程是 **充分考虑的计划 → 最小实现 → 一次针对需求的检查 → 有问题修改、没问题放行**。简单任务留在主会话；复杂任务只分派确实需要完成的部分。检查由主会话或一个 reviewer 负责，不重复做同一轮检查；修复后只看修复和直接影响。用户只要求 Review 时保持只读。
+默认流程是 **充分考虑的计划 → 最小实现 → 针对具体问题检查一次 → 有问题修改、没问题放行**。简单任务留在主会话；复杂任务分派确实需要完成的部分。每个检查问题由一个负责人处理，主会话汇总；修复后只看修复和直接影响。用户只要求 Review 时保持只读。
 
 | 角色 | 模型 | 推理强度 |
 | --- | --- | --- |
-| conductor、explorer、researcher、worker、reviewer、finding_validator、test_author、tester | `gpt-6.1-sol` | `max` |
+| conductor、design_critic、debugger、guardian | `gpt-6-astra` | `xhigh` |
+| explorer、researcher、worker、tester | `gpt-6.1-terra` | `max` |
+| reviewer、finding_validator、test_author | `gpt-6.1-sol` | `max` |
 | scout、mechanic、check_runner | `gpt-6-luna` | `max` |
-| design_critic、debugger、guardian | `gpt-6-astra` | `xhigh` |
 
-保留 14 个角色的模型。多角色任务先由 **Conductor 评估并从全部角色中选择实际需要的角色**，主会话负责派遣；简单任务和 root-only 留在主会话。design_critic、finding_validator、guardian、test_author、tester、check_runner 都可按具体需要选择，**不要求用户逐个点名，也不要求每次调用全部角色**。
+保留 14 种角色，不增加永久角色。多角色任务先由 **Conductor 评估依赖并选择实际需要的角色**，主会话负责派遣；同一角色可以有多个不同范围的实例。简单任务、root-only 和禁止子代理的任务留在主会话。专项角色按具体问题选择，不要求用户逐个点名，也不运行整个角色目录。
 
-尽量少做额外测试：先读源码和结果、复用已有观察；重要行为无法据此判断时才安排最小针对性测试，优先现有用例，确有缺口才补新测试。专项审查须对应一个尚未解决且影响结果的具体问题，不能重复普通 review。默认一个实现者、最多按需四个子智能体；不默认跑全套测试、构建矩阵、A/B 或连续审核。用户明确的不测试、只读等限制仍优先遵守。
+最多同时运行 **4 个子代理，不含主会话**，并受实际运行时容量限制。输入齐备、依赖已完成且无写入冲突的任务可以并行；有四项必要任务就同时派发四项，空位出现后接续就绪任务。独立模块的探索、资料研究及接口已确定的独立文件实现都可并发；共享写入和依赖保持有序。不为凑满并发制造任务，四个并发也不等于整个任务只能创建四个实例。
+
+每个角色提示词明确职责、输入、工作方法、结果格式、停止条件和执行边界；任务书再给出一个目标、窄方向、相关上下文和文件范围。减少无关历史，并在上下文仍适合时复用子代理。重要改动可从不同的具体功能角度独立检查，先看原始需求和代码，再参考其他结论；不投票、不重复全量 review、不设置自动最终 Guardian。
+
+尽量少做额外测试：先读源码和结果、复用已有观察；重要行为无法据此判断时才安排最小针对性检查，优先现有用例，确有具体缺口才补测试。不因“更稳妥”增加测试、子代理、全量审查、主动安全审查、防御性包装、兼容层、未来抽象或额外校验层。用户明确的不测试、只读等限制优先遵守。
 
 默认禁止 hash/checksum/指纹/签名与额外产物。仅当用户明确要求发布校验、去重、缓存命中或对照已知摘要做拒绝，且结果实际用于该操作时才计算。超出用户任务范围的动作先问一句“我想加 X，因为 Y，是否允许？”，等答复再做。详见[执行规则](.agents/skills/codex-native-orchestrator/SKILL.md)。
 
@@ -74,7 +79,7 @@ python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models 
 
 从技能菜单选择 **Codex Native Orchestration** 或直接用 `$codex-native-orchestrator` 加任务，手动启用。普通/Max 不按任务内容自动启用。
 
-Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。两种入口使用完全相同的按需选择规则：多角色任务由 Conductor 评估，主会话派遣所需角色，没有固定的 Tester → Reviewer → Guardian 流水线。
+Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。**两种入口加载同一份 14 角色清单、固定模型和四子代理并发规则**：Astra/xhigh Conductor 评估，主会话派遣所需角色，包括上述四个 Terra/max 角色。没有固定的 Tester → Reviewer → Guardian 流水线。
 
 实际选择 **Codex ZCode**、用 `$codex-zcode` 加任务或直接要求使用 ZCode 时，该选择优先于 Ultra 的自动 Native 路由；只是讨论、引用或检查 ZCode 不算启用。
 
@@ -86,7 +91,7 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 安装脚本不计算摘要，不生成备份凭据或日志。
 
-**v4 移除了旧持久 CLI runner、哈希证据机制和自动最终 gate**，以及只服务于这些机制的 schema/测试。旧 `native-begin`、`native-gate`、`run`、`revise-run` 等控制器命令不再提供；工作直接由原生 agent 工具协调。旧运行记录不改动，续接时复用已有计划和结论，不迁移、不重复执行，也不默认生成新账本。
+旧持久 CLI runner、哈希证据机制和自动最终 gate 已移除，以及只服务于这些机制的 schema/测试。旧 `native-begin`、`native-gate`、`run`、`revise-run` 等控制器命令不再提供；工作直接由原生 agent 工具协调。旧运行记录不改动，续接时复用已有计划和结论，不迁移、不重复执行，也不默认生成新账本。
 
 ### ZCode 角色编排
 
@@ -115,7 +120,7 @@ This repository provides two Codex skills installed and selected independently, 
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | Let the planner select native Codex roles for scoped implementation and inspection. |
 | [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | Plan in Codex, submit bounded ZCode tasks, and inspect their actual results. |
 
-Version 5 removes **Codex External Provider** and **Codex Harness Bridge** in favor of the dedicated Codex ZCode integration. Native role models and workflow, and the Qoder plugin, remain unchanged.
+**v1.0.0** updates Native's 14 roles: Astra handles planning and difficult judgments, Terra handles four frequent execution roles, and focused prompts support concurrent independent assignments. Manual and Ultra entrypoints share the same orchestration. Historical releases use v0.x numbering; v0.5.0 introduced the dedicated Codex ZCode integration.
 
 ### Install
 
@@ -154,17 +159,22 @@ Use `events`, `status` and `result` to track work and read results, `continue` t
 
 ### Native roles and workflow
 
-Use **plan → implement → inspect once → fix concrete issues or deliver**. Understand the requirements and relevant source before editing. Keep simple work in the host and delegate only necessary parts of the requested implementation. One owner, either the host or reviewer, inspects the result and directly affected callers. After a repair, inspect that repair and its effects; reuse unchanged conclusions. Review-only requests never authorize edits.
+Use **plan → implement → inspect each concrete question once → fix concrete issues or deliver**. Understand the requirements and relevant source before editing. Keep simple work in the host and delegate necessary parts of the request. Assign one owner per checking question; the host consolidates the results. After a repair, inspect that repair and its effects; reuse unchanged conclusions. Review-only requests never authorize edits.
 
 | Roles | Model | Effort |
 | --- | --- | --- |
-| conductor, explorer, researcher, worker, reviewer, finding_validator, test_author, tester | `gpt-6.1-sol` | `max` |
+| conductor, design_critic, debugger, guardian | `gpt-6-astra` | `xhigh` |
+| explorer, researcher, worker, tester | `gpt-6.1-terra` | `max` |
+| reviewer, finding_validator, test_author | `gpt-6.1-sol` | `max` |
 | scout, mechanic, check_runner | `gpt-6-luna` | `max` |
-| design_critic, debugger, guardian | `gpt-6-astra` | `xhigh` |
 
-All 14 role models are preserved. For multi-role work, **Conductor assesses the task and selects any roles it needs**, and the host dispatches them. Simple work and root-only remain in the host. Specialist and test roles do not require the user to name them. Select a useful subset; do not run the entire catalog.
+Keep 14 role types without adding permanent roles. For multi-role work, **Conductor assesses dependencies and selects the roles needed**, and the host dispatches them. A role may have several instances with different scopes. Simple work, root-only and no-subagent requests remain in the host. Specialists answer concrete questions; the user need not name each role. Do not run the entire catalog.
 
-Minimize extra testing: inspect source/results and reuse existing observations first. Choose the smallest targeted check only for important unresolved behavior, preferring existing cases and writing new tests only for a concrete gap. A specialist review must answer a distinct material question, not repeat ordinary review. Default to one writer and at most four children as needed. No routine suites, build matrices, experiments or multi-round approval chains. Explicit user prohibitions still take precedence.
+Run at most **four subagents concurrently, excluding the host**, within actual runtime capacity. An assignment is ready when inputs are available, dependencies are satisfied and writes do not conflict. Dispatch all four when four useful assignments are ready, and refill freed slots. Independent exploration, research and edits to separately owned files with settled interfaces can run concurrently; order shared writes and dependencies. Do not invent filler tasks. Four is a concurrency limit, not a limit on total instances over the task.
+
+Each role prompt specifies responsibility, inputs, method, result, stopping conditions and execution boundaries. Each assignment adds one objective, a narrow direction, relevant context and owned paths. Avoid unrelated history; reuse a child when its context still fits. Important changes may receive independent checks of distinct concrete functional questions, using original requirements and source before other conclusions. No voting, duplicate full reviews or automatic final Guardian.
+
+Minimize extra testing: inspect source/results and reuse observations first. Choose the smallest targeted check only for important unresolved behavior, preferring existing cases and adding tests only for a concrete gap. Do not add tests, subagents, full reviews, unsolicited security audits, defensive wrappers, compatibility layers, future abstractions or extra verification layers for reassurance. Explicit no-tests and read-only instructions take precedence.
 
 Do not calculate hashes, checksums, fingerprints or signatures unless the user explicitly requests published checksums, deduplication, cache-hit decisions or known-digest rejection and the result serves that operation. Do not create extra files or logs for traceability. Ask before a scope-expanding action, then wait. See the [skill](.agents/skills/codex-native-orchestrator/SKILL.md).
 
@@ -174,13 +184,13 @@ Place the role TOMLs in personal `CODEX_HOME/agents` and merge the manifest's `c
 
 Keep `allow_implicit_invocation: false`. Select **Codex Native Orchestration** in the skill menu or directly invoke `$codex-native-orchestrator` with a task. Ordinary/Max task matching does not activate it.
 
-The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. Both entrypoints use the same planner-led selection: Conductor assesses multi-role work, the host dispatches the necessary roles, and no fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
+The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. **Both entrypoints load the same 14-role manifest, fixed models and four-subagent concurrency rules**: Astra/xhigh Conductor assesses multi-role work, and the host dispatches the selected roles, including the four Terra/max roles above. Preserve the user's host model and effort. No fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
 
 Selecting **Codex ZCode**, invoking `$codex-zcode` with a task, or directly asking to use ZCode takes priority over automatic Native routing in Ultra. Discussion, quotations and requests to inspect ZCode do not activate that override.
 
 Run `python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/install_activation.py --apply` to merge the marked personal AGENTS.md entrypoint, preserving other guidance. Omit `--apply` for a read-only check. It creates no digest, backup receipt or log.
 
-**Version 4 removes the old persistent CLI runner, hash evidence machinery and automatic final gate**, together with their dedicated schemas/tests. The old controller commands, including `native-begin`, `native-gate`, `run` and `revise-run`, are no longer available. Coordinate work through native agent tools. Historical run files remain untouched; reuse useful plans and results without a migration layer or replacement ledger.
+The old persistent CLI runner, hash evidence machinery and automatic final gate have been removed, together with their dedicated schemas/tests. The old controller commands, including `native-begin`, `native-gate`, `run` and `revise-run`, are no longer available. Coordinate work through native agent tools. Historical run files remain untouched; reuse useful plans and results without a migration layer or replacement ledger.
 
 ### ZCode role orchestration
 

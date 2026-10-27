@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "package_version": "4.1.0",
+  "package_version": "1.0.0",
   "package_id": "codex-native-orchestrator",
   "skill": {
     "entry": ".agents/skills/codex-native-orchestrator/SKILL.md",
@@ -13,28 +13,28 @@
   },
   "roles": {
     "conductor": {
-      "model": "gpt-6.1-sol",
-      "reasoning_effort": "max",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "xhigh",
       "sandbox_mode": "read-only",
       "automatic": true,
       "requires_explicit_request": false
     },
     "explorer": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoning_effort": "max",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "researcher": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoning_effort": "max",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "worker": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoning_effort": "max",
       "sandbox_mode": "workspace-write",
       "automatic": false,
@@ -55,7 +55,7 @@
       "requires_explicit_request": false
     },
     "tester": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.1-terra",
       "reasoning_effort": "max",
       "sandbox_mode": "workspace-write",
       "automatic": false,
@@ -137,7 +137,7 @@
   },
   "installation_scope": "global",
   "quality_policy": {
-    "inspection_owner": "host_or_one_reviewer",
+    "inspection_owner": "one-owner-per-question-host-consolidates",
     "review_is_read_only": true,
     "tests": "minimal-targeted-only-for-important-unresolved-behavior",
     "additional_gates": "planner-selected-distinct-consequential-question-only",
@@ -145,7 +145,10 @@
     "repeat_completed_work": false,
     "extra_artifacts": false,
     "scope_expansion": "ask-user-before-action",
-    "role_selection": "conductor-selects-any-needed-role-within-user-scope"
+    "role_selection": "conductor-selects-bounded-assignments-same-role-multiple-instances",
+    "parallel_dispatch": "fill-available-four-subagent-capacity-with-independent-ready-work",
+    "cross_checks": "distinct-concrete-functional-questions-only",
+    "unsolicited_security_audits": false
   },
   "workflow": [
     "plan",

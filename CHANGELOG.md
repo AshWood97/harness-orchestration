@@ -1,6 +1,15 @@
 # Changelog
 
-## 5.0.0 — 2026-10-25
+## 1.0.0 — 2026-10-27
+
+- Keep 14 Native role types. Move conductor to GPT-6 Astra/xhigh and explorer, researcher, worker and tester to GPT-6.1 Terra/max. Preserve the other role assignments and the user's host model.
+- Use the same role manifest and workflow for manual skill invocation and the trusted Ultra entrypoint. Keep four concurrent subagents, excluding the host and subject to runtime capacity.
+- Dispatch useful independent ready work concurrently, including multiple instances of a role, and refill freed slots. Order dependencies and shared writes; do not create filler assignments.
+- Give each role explicit responsibility, inputs, method, result, stopping conditions and execution boundaries. Give children narrow assignments with relevant context and separately owned paths.
+- Assign one owner per concrete checking question. Allow independent checks of distinct functional questions when needed; keep review read-only and avoid duplicate reviews, automatic final gates, unsolicited security audits and reassurance work.
+- Normalize historical repository versions to v0.x and rename the old v5.0.0 release/tag to v0.5.0 without rewriting its source history. ZCode and Qoder behavior is unchanged in this release.
+
+## 0.5.0 — 2026-10-25
 
 - Preserve the Windows PowerShell module-analysis cache environment variable so identity queries do not cold-start and time out. Handle early cancellation by waiting for the same attempt's persisted process identities before retrying core cancellation; preserve process-tree verification and other failures.
 
@@ -10,28 +19,28 @@
 - Inherit ZCode workspace session model/reasoning defaults unless the user explicitly selects a task model. Keep that model on continuation; changing it requires a new task. Make the separate ZCode role installer inherit by default, with optional model/depth overrides and an explicit built-in-model reset.
 - Replace retired-package CI with focused Codex ZCode and ZCode checks on macOS/Windows using Python 3.11 and Node.js 24. Keep Native installer checks manually selectable and preserve historical entries below.
 
-## 4.3.0 — 2026-10-21
+## 0.4.3 — 2026-10-21
 
 - Update Qoder plugin and skill to **1.1.0**: Default Agent conversations automatically orchestrate actual complex engineering work when division helps. Keep simple Q&A and clear localized edits in the host; do not infer complexity from text length or file count.
 - Add a plugin-level `UserPromptSubmit` hook that reads one packaged static routing rule using `cat` and `QODER_PLUGIN_ROOT`. For complex work, the first tool call loads the full skill and Conductor follows before any source retrieval or reading; no separate global-memory setup is required. The hook targets macOS/Linux; Windows is unverified. Explicit skill requests and the custom coordinator remain optional.
 - Let one plugin Conductor select the smallest useful subset from all 14 roles. Preserve one writer, at most four children, one checking owner, minimal checks, and user restrictions including `root-only` and no subagents. Quoted or attached instructions do not authorize work.
 - Leave all 14 Qoder role prompts, tool sets, and model inheritance unchanged. Codex and ZCode activation behavior is unchanged.
 
-## 4.2.0 — 2026-10-21
+## 0.4.2 — 2026-10-21
 
 - Rename the repository to **Harness Orchestration / 多 Harness 角色编排** (`AshWood97/harness-orchestration`) for Codex, ZCode, Qoder, and future harness adapters. Preserve existing Codex skill identifiers, paths, ZCode files, and activation markers.
 - Add Qoder desktop plugin **harness-orchestration 1.0.0** with all 14 adapted roles and one manually activated skill. Omit role model fields to follow the current Qoder conversation model; provide read-only tool sets without Bash/Edit/Write.
 - Add reusable custom-coordinator instructions and bilingual ZIP import, packaging, role, and permission documentation. Keep one writer, at most four children by default, one checking owner, no nested delegation, minimal targeted checks, and the explicit-request boundary for digests.
 - Keep the Qoder package credential-free, without hooks, MCP servers, or a new test framework. Declare individual agent Markdown paths for desktop importer compatibility.
 
-## 4.1.0 — 2026-10-19
+## 0.4.1 — 2026-10-19
 
 - Let Conductor assess multi-role tasks and select any needed roles; the host dispatches the plan. ZCode's host performs the same planning role. Individual specialists no longer require the user to name them.
 - Keep extra testing minimal: inspect first, reuse results, prefer existing targeted cases and write tests only for concrete important gaps. Respect explicit no-tests/read-only instructions.
 - Select design criticism, finding validation or Guardian only for distinct material questions; do not reinstate full-role pipelines, duplicate review, hash machinery or extra process artifacts.
 
 
-## 4.0.0 — 2026-10-19
+## 0.4.0 — 2026-10-19
 
 - Make both Native entrypoints and ZCode follow plan → implement → one focused inspection → repair concrete issues or deliver.
 - Preserve role models; remove mandatory Conductor startup, test-author/tester chains, automatic Guardian, repeat-review requirements and fixed repair/escalation waves.
@@ -41,9 +50,9 @@
 - Remove automatic hashes and backup receipts from Native activation and ZCode installation. Keep personal guidance outside the managed blocks.
 - Stop automatic Native/ZCode test matrices. Keep the existing External/Harness CI scoped to changes in those packages; installer tests remain manually selectable.
 
-此前版本记录仅为历史，不再描述 v4 的执行规则。
+以下版本记录仅为历史，不代表当前执行规则。
 
-## 3.3.0 — 2026-10-16
+## 0.3.3 — 2026-10-16
 
 The repository is now **Codex + ZCode Orchestration**, renamed from `codex-three-paths` to `codex-zcode-orchestration`. Existing Codex skill names remain stable. This release combines the local quality-workflow upgrades with the repository's existing Windows support.
 

@@ -17,7 +17,7 @@ class InstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp).resolve() / 'new-home'
             result = install.configure(home, reset_builtin_models=True)
-            self.assertEqual(len(result['changed_files']), 8)
+            self.assertEqual(len(result['changed_files']), 11)
             self.assertFalse(home.exists())
 
     def test_install_preserves_guidance_and_is_idempotent(self):
@@ -27,7 +27,7 @@ class InstallTests(unittest.TestCase):
             (home / 'AGENTS.md').write_bytes(original)
             install.configure(home, apply=True)
             self.assertTrue((home / 'AGENTS.md').read_bytes().startswith(original))
-            self.assertEqual(len(list((home / 'agents').glob('*.md'))), 7)
+            self.assertEqual(len(list((home / 'agents').glob('*.md'))), 10)
             for p in (home / 'agents').glob('*.md'):
                 text = p.read_text(encoding='utf-8')
                 self.assertNotIn('\nmodel:', text)
@@ -89,7 +89,7 @@ class InstallTests(unittest.TestCase):
                 (agents / (role + '.md')).write_bytes(legacy.replace(b'\n', b'\r\n'))
             result = install.configure(home)
             self.assertEqual(result['conflicting_roles'], [])
-            self.assertEqual(len(result['changed_files']), 8)
+            self.assertEqual(len(result['changed_files']), 11)
             install.configure(home, apply=True)
             for role in install.ROLES:
                 name = role + '.md'

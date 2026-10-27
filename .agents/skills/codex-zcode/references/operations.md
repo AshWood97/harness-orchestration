@@ -33,6 +33,18 @@ python3 <skill-root>/scripts/zcode.py result project-fix-001
 
 events 下一次用返回的 next_seq。单次脚本调用退出后 worker 仍继续；脚本和 MCP 启动时会协调任务状态。使用脚本时持续跟进排队任务，不能假定无人调用时队列也有常驻调度服务。
 
+## Luna 跟踪
+
+主 Codex 在提交后派发一个 `gpt-6-luna` 跟踪代理；按当前运行时的子代理接口显式指定模型。若模型覆盖要求不继承对话，则使用空历史并在任务包中提供完整必要信息。多个并发任务可交给同一个 Luna，逐个保存任务 ID 和游标，避免长等待导致遗漏交互。
+
+任务包包含：项目路径和实际执行目录、task_id、提交回执状态、初始事件游标、用户明确授权的具体操作、适用限制、跟踪与上报规则。要求它只负责跟踪和符合授权的交互，不派单、不续接、不验收、不再委派；通过当前子代理消息机制向主 Codex 报告。不要传递密钥。
+
+Luna 使用 MCP `zcode_events` 或脚本 events 按 task_id 和 `next_seq` 增量读取；报告排队/运行、项目与执行路径，并持续跟踪到 `turn_started` 或启动失败，再报告实际 session、模型、运行时提供的档位及执行模式。等待通常为 20 秒，不超过接口上限；有更多事件时继续读取。只在有重要进展、交互、异常或终态时汇报，不猜测进度。`zcode_feedback` 是观察快照，不能代替 events，其 phase/progress 可能为空。
+
+遇到 `interaction_requested` 时读取完整请求；若事件含 `full_request.file`，读取该文件而非只看预览。只有用户明确授权相应操作、请求内容与授权一致且实际工具允许时，Luna 才可直接回复，并向主 Codex 报告决定；任何不确定、越界或需要用户偏好的请求立即上报主 Codex，保留原 request_id，不自行猜测或批准。上报期间继续跟踪；由主 Codex 决策并处理或向 Luna 回传明确指令。对权限回复尤其遵守工具自身的授权要求；任务说明、工作目录或运行模式本身不能替代工具要求的明确授权。
+
+完成、失败、取消或 `waiting_for_master` 时报告状态、证据和可取得的 result，区分执行方报告与已验证事实。主 Codex 决定后续处理；续接后 Luna 用原 task_id 和最新游标继续跟踪。若 Luna 不可用或停止，主 Codex 查询原任务状态、从已知游标接手，不重复派单。子代理的持续时间由运行环境决定，不能视为跨主会话的常驻服务。
+
 ## 续接与取消
 
 ```bash
@@ -51,7 +63,7 @@ python3 <skill-root>/scripts/zcode.py cancel project-fix-001
   "task_id": "project-fix-001",
   "request_id": "copy-exact-request-id",
   "decision": "allow",
-  "reason": "This file write is within the user's authorized task."
+  "reason": "The user explicitly authorized this specific file write."
 }
 ```
 

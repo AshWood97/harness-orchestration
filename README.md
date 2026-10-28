@@ -37,7 +37,7 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 独立规划代理制定任务与依赖：默认使用 Sol `max`，复杂或高风险任务使用 Astra `xhigh`。主 Codex 核对授权、协调和验收；Luna `max` 可代发已定任务、跟踪会话并汇报。互不冲突的已就绪任务尽可能在同一项目的多个 ZCode 会话中并行执行，依赖满足后及时补位；实际并发能力以桌面界面和运行环境为准。
 
-通过 ZCode 桌面创建可见任务并保留原生历史；未指定执行模型时保留界面当前选择，指定时在界面选择。派单、跟踪、权限处理和续接都使用桌面界面，不使用旧 MCP、bridge 脚本或 app-server。操作与控制权交接详见 [skill](.agents/skills/codex-zcode/SKILL.md) 和[桌面操作参考](.agents/skills/codex-zcode/references/operations.md)。
+通过 ZCode 桌面创建可见任务并保留原生历史；未指定执行模型时保留界面当前选择，指定时在界面选择。派单、跟踪、权限处理和续接都使用桌面界面，不使用旧 MCP、bridge 脚本或 app-server。普通稳定任务默认每 5 分钟巡检，符合条件时退至 10 分钟；关键依赖为 3 分钟，交互或收尾仅短时加频。Luna 合并汇报，主控减少无新交付时的重复检查；巡检周期不等于模型调用周期。操作与控制权交接详见 [skill](.agents/skills/codex-zcode/SKILL.md) 和[桌面操作参考](.agents/skills/codex-zcode/references/operations.md)。
 
 ### Native 角色与流程
 
@@ -129,7 +129,7 @@ Select **Codex ZCode** in the skill menu, invoke `$codex-zcode` with a task, or 
 
 A separate planning agent defines tasks and dependencies: Sol `max` by default, or Astra `xhigh` for complex or high-risk work. The host Codex checks authorization, coordinates and accepts results; Luna `max` can send approved tasks, monitor sessions and report back. Ready, non-conflicting tasks run in parallel in separate ZCode sessions where possible, and newly unblocked work starts promptly. Actual concurrency depends on the desktop interface and runtime.
 
-Create visible tasks in the ZCode desktop and preserve their native history. Keep the current execution model shown in the interface unless the user specifies another, in which case select it there. Dispatch, tracking, permissions and continuations use the desktop interface rather than the old MCP, bridge scripts or app-server. See the [skill](.agents/skills/codex-zcode/SKILL.md) and [desktop operations reference](.agents/skills/codex-zcode/references/operations.md) for the workflow and control handoff.
+Create visible tasks in the ZCode desktop and preserve their native history. Keep the current execution model shown in the interface unless the user specifies another, in which case select it there. Dispatch, tracking, permissions and continuations use the desktop interface rather than the old MCP, bridge scripts or app-server. Stable tasks are checked every 5 minutes, backing off to 10 when eligible; critical dependencies use 3 minutes, with brief faster checks for interactions or completion signals. Luna batches reports and the host avoids redundant checks without new deliverables. UI polling intervals do not imply identical model-call intervals. See the [skill](.agents/skills/codex-zcode/SKILL.md) and [desktop operations reference](.agents/skills/codex-zcode/references/operations.md) for the workflow and control handoff.
 
 ### Native roles and workflow
 

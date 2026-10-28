@@ -13,7 +13,7 @@ Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
 | Skill | 用途 |
 | --- | --- |
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | 由规划者按需选择原生 Codex 角色，完成实现与检查。 |
-| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | 由 Codex 规划、提交有明确边界的 ZCode 任务，并检查实际结果。 |
+| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | 由独立代理规划，通过 ZCode 桌面并行执行任务，并由 Codex 验收。 |
 
 **v1.0.0** 更新 Native 的 14 个角色：Astra 负责规划和复杂判断，Terra 负责四类高频执行任务，并强化独立任务并发与窄范围提示词。手动技能与 Ultra 使用同一套编排。旧发布编号统一为 v0.x；v0.5.0 引入了专用的 Codex ZCode 接入。
 
@@ -27,13 +27,7 @@ Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
       .agents/skills/codex-zcode
 ```
 
-skill 安装到 `${CODEX_HOME:-~/.codex}/skills/`。已有同名安装时先检查个人改动。安装 Codex ZCode 后，再执行运行时设置：
-
-```sh
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/install.py --apply
-```
-
-Codex ZCode 需要 **Node.js 22.18+** 和 **Python 3.9+**。安装器使用固定版本的 [Sandyzzx/codex-zcode-bridge 1.2.7](https://github.com/Sandyzzx/codex-zcode-bridge) 共享核心，注册 MCP `codex_zcode`；独立设置位于 `$CODEX_HOME/codex-zcode/runtime-config.json`，任务状态位于同目录的 `state/`。`CODEX_HOME` 默认是 `~/.codex`，可用 `--codex-home` 指定。迁移时可加 `--retire-old-skills`，移除该目录下旧的 External Provider、Harness Bridge 和已安装的 `zcode-orchestrator` 原型；此选项须明确传入。
+skill 安装到 `${CODEX_HOME:-~/.codex}/skills/`。已有同名安装时先检查个人改动。Codex ZCode 使用本机 ZCode 桌面应用和当前运行时的原生电脑控制工具；执行任务不需要安装或注册旧 bridge/MCP。旧 bridge 文件及配置不会由此技能自动卸载或更改。
 
 Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分部署固定角色与入口，再开始新会话。调用 skill 不改变用户选择的主会话模型。
 
@@ -41,16 +35,9 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 从技能菜单选择 **Codex ZCode**、用 `$codex-zcode` 加任务，或直接要求 Codex 使用 ZCode。讨论 ZCode、引用内容或普通任务复杂度不会启用它。实际的 ZCode 调用优先于 Ultra 自动 Native 路由。
 
-默认不传 `model` 或推理参数，沿用 ZCode 当前工作区新会话的默认值；只有用户为当前任务明确指定时才覆盖模型。续接任务保留原模型，换模型应新建任务。默认直接提交 JSON 任务书；指定模型时才查询目录：
+独立规划代理制定任务与依赖：默认使用 Sol `max`，复杂或高风险任务使用 Astra `xhigh`。主 Codex 核对授权、协调和验收；Luna `max` 可代发已定任务、跟踪会话并汇报。互不冲突的已就绪任务尽可能在同一项目的多个 ZCode 会话中并行执行，依赖满足后及时补位；实际并发能力以桌面界面和运行环境为准。
 
-```sh
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py doctor
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py submit --file /absolute/path/to/task.json
-# 仅在明确选择模型时查询：
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models --workspace /absolute/path/to/workspace
-```
-
-`events`、`status`、`result` 用于跟踪和读取结果，`continue` 用于续接，`cancel` 用于取消；参数与任务格式见 [skill](.agents/skills/codex-zcode/SKILL.md)。运行时仅通过已配置的 ZCode 接口执行任务，不提供 computer-use、UI 或远程控制回退。
+通过 ZCode 桌面创建可见任务并保留原生历史；未指定执行模型时保留界面当前选择，指定时在界面选择。派单、跟踪、权限处理和续接都使用桌面界面，不使用旧 MCP、bridge 脚本或 app-server。操作与控制权交接详见 [skill](.agents/skills/codex-zcode/SKILL.md) 和[桌面操作参考](.agents/skills/codex-zcode/references/operations.md)。
 
 ### Native 角色与流程
 
@@ -107,7 +94,7 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### 公开仓库与验证范围
 
-本仓库只包含源码、文档、占位符示例和测试。不要提交 API key、个人配置、私有模型目录、任务 brief、运行日志或报告。Codex ZCode 的测试验证本地协议和安装行为，不代表所有 ZCode 版本或在线服务均已验证。
+本仓库只包含源码、文档、占位符示例和测试。不要提交 API key、个人配置、私有模型目录、任务 brief、运行日志或报告。保留的 Codex ZCode bridge 测试覆盖旧的本地协议和安装行为，不验证当前桌面操作或多会话并发；实际并发需在真实任务中核实。
 
 CI 只对 Codex ZCode 与 `zcode/` 路径的改动运行相关测试，使用 macOS/Windows、Python 3.11 和 Node.js 24。Native 安装器测试保留为手动选择。日常编排任务不自动触发测试矩阵。见[变更记录](CHANGELOG.md)。
 
@@ -118,7 +105,7 @@ This repository provides two Codex skills installed and selected independently, 
 | Skill | Purpose |
 | --- | --- |
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | Let the planner select native Codex roles for scoped implementation and inspection. |
-| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | Plan in Codex, submit bounded ZCode tasks, and inspect their actual results. |
+| [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | Plan with a separate agent, run tasks in parallel through the ZCode desktop, and have Codex inspect the results. |
 
 **v1.0.0** updates Native's 14 roles: Astra handles planning and difficult judgments, Terra handles four frequent execution roles, and focused prompts support concurrent independent assignments. Manual and Ultra entrypoints share the same orchestration. Historical releases use v0.x numbering; v0.5.0 introduced the dedicated Codex ZCode integration.
 
@@ -132,13 +119,7 @@ Paths: .agents/skills/codex-native-orchestrator
        .agents/skills/codex-zcode
 ```
 
-Skills install into `${CODEX_HOME:-~/.codex}/skills/`. Inspect an existing installation before replacing personal changes. After installing Codex ZCode, set up its runtime:
-
-```sh
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/install.py --apply
-```
-
-Codex ZCode requires **Node.js 22.18+** and **Python 3.9+**. Setup uses the pinned [Sandyzzx/codex-zcode-bridge 1.2.7](https://github.com/Sandyzzx/codex-zcode-bridge) shared core and registers MCP `codex_zcode`. It keeps independent settings at `$CODEX_HOME/codex-zcode/runtime-config.json` and task state in the adjacent `state/` directory. `CODEX_HOME` defaults to `~/.codex`; use `--codex-home` to select another home. Explicitly pass `--retire-old-skills` during migration to remove the installed External Provider, Harness Bridge and `zcode-orchestrator` prototype from that home.
+Skills install into `${CODEX_HOME:-~/.codex}/skills/`. Inspect an existing installation before replacing personal changes. Codex ZCode uses the local ZCode desktop app and the current runtime's native computer-control tools; executing tasks does not require installing or registering the old bridge/MCP. The skill does not automatically uninstall or change existing bridge files or configuration.
 
 Native skill installation and named-agent configuration are separate steps. Deploy its fixed roles and entrypoint as described below, then start a new session. Invoking the skill does not change the selected host model.
 
@@ -146,16 +127,9 @@ Native skill installation and named-agent configuration are separate steps. Depl
 
 Select **Codex ZCode** in the skill menu, invoke `$codex-zcode` with a task, or directly ask Codex to use ZCode. Discussion, quoted content and ordinary task complexity do not activate it. An actual ZCode invocation takes priority over automatic Native routing in Ultra.
 
-Omit `model` and reasoning parameters by default to inherit the ZCode workspace's new-session defaults. Override the model only when the user explicitly selects one for the task. Continuations retain the original model; use a new task to change it. Submit a JSON task file directly; inspect the catalog only for an explicit model selection:
+A separate planning agent defines tasks and dependencies: Sol `max` by default, or Astra `xhigh` for complex or high-risk work. The host Codex checks authorization, coordinates and accepts results; Luna `max` can send approved tasks, monitor sessions and report back. Ready, non-conflicting tasks run in parallel in separate ZCode sessions where possible, and newly unblocked work starts promptly. Actual concurrency depends on the desktop interface and runtime.
 
-```sh
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py doctor
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py submit --file /absolute/path/to/task.json
-# Only for an explicit model selection:
-python3 /absolute/path/to/CODEX_HOME/skills/codex-zcode/scripts/zcode.py models --workspace /absolute/path/to/workspace
-```
-
-Use `events`, `status` and `result` to track work and read results, `continue` to resume, and `cancel` to cancel. See the [skill](.agents/skills/codex-zcode/SKILL.md) for arguments and task format. The runtime uses the configured ZCode interface with no computer-use, UI or remote-control fallback.
+Create visible tasks in the ZCode desktop and preserve their native history. Keep the current execution model shown in the interface unless the user specifies another, in which case select it there. Dispatch, tracking, permissions and continuations use the desktop interface rather than the old MCP, bridge scripts or app-server. See the [skill](.agents/skills/codex-zcode/SKILL.md) and [desktop operations reference](.agents/skills/codex-zcode/references/operations.md) for the workflow and control handoff.
 
 ### Native roles and workflow
 
@@ -206,6 +180,6 @@ Import the ZIP in Qoder CN through **Extensions → Plugins → Add Plugin → U
 
 ### Public repository and verification limits
 
-This repository contains source, documentation, placeholder examples and tests. Do not commit API keys, personal configuration, private model catalogs, task briefs, run logs or reports. Codex ZCode tests cover local protocol and installation behavior; they do not establish compatibility with every ZCode release or live service.
+This repository contains source, documentation, placeholder examples and tests. Do not commit API keys, personal configuration, private model catalogs, task briefs, run logs or reports. The retained Codex ZCode bridge tests cover the old local protocol and installation behavior; they do not verify the current desktop workflow or multi-session concurrency, which must be checked in a real task.
 
 CI runs relevant checks for changes under Codex ZCode and `zcode/`, using macOS/Windows, Python 3.11 and Node.js 24. Native installer tests remain manually selectable. Everyday orchestration does not automatically trigger a test matrix. See the [changelog](CHANGELOG.md).

@@ -1,8 +1,12 @@
 # Harness Orchestration / 多 Harness 角色编排
 
-Plan → implement → inspect → fix or deliver · Codex · ZCode · Qoder
+**中文简介：** Codex Native 按需编排原生角色；Codex ZCode 通过电脑控制在 ZCode 桌面派发并行任务、续接任务，并由 Codex 验收结果。仓库还提供独立的 ZCode 角色包和 Qoder 插件。详细文档提供中文与英文。
 
-计划 → 执行 → 检查 → 有问题修改、没问题放行 · Codex · ZCode · Qoder
+**English overview:** Codex Native orchestrates native roles as needed; Codex ZCode uses computer control of the ZCode desktop to dispatch parallel tasks, resume them and have Codex inspect their results. The repository also provides a standalone ZCode role package and a Qoder plugin. Detailed documentation is available in Chinese and English.
+
+**日本語の概要：** Codex Native は必要に応じてネイティブ役割を編成します。Codex ZCode はコンピューター操作で ZCode デスクトップに並行タスクを依頼・続行し、Codex が結果を確認します。独立した ZCode 役割パッケージと Qoder プラグインも提供します。詳細なドキュメントは中国語と英語です。
+
+**한국어 소개:** Codex Native는 필요에 따라 네이티브 역할을 조율합니다. Codex ZCode는 컴퓨터 제어로 ZCode 데스크톱에 병렬 작업을 전달하고 이어서 진행하며, Codex가 결과를 확인합니다. 독립적인 ZCode 역할 패키지와 Qoder 플러그인도 제공합니다. 상세 문서는 중국어와 영어로 제공됩니다.
 
 [中文](#中文) · [English](#english)
 

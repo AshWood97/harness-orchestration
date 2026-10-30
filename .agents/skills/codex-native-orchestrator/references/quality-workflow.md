@@ -1,6 +1,6 @@
 # Focused checking and completion
 
-Plan the requested behavior, implement the smallest change, then inspect the actual result against that requirement and directly affected callers. Reuse existing source observations and completed work. Checking is not an invitation to add tests, builds, security audits, defensive code, compatibility layers, future abstractions or extra agents.
+Plan the requested behavior, implement the smallest change, then inspect the actual result against that requirement and directly affected callers. Reuse existing source observations and completed work. Checking is not an invitation to invent extra tests, builds, security audits, defensive code, compatibility layers, future abstractions or duplicate checking work. Useful parallel agents may execute distinct in-scope assignments; delegation itself is not extra work or a reason to ask for approval.
 
 Assign one owner per concrete checking question: the host or a reviewer. An important change may justify independent checks of distinct functional questions, such as implementation behavior and its caller contract. Give those checkers the original requirements and relevant source before other conclusions. The host consolidates their grounds without repeating the inspections or deciding by majority vote. Task size or "more reliable" alone does not justify another checker.
 

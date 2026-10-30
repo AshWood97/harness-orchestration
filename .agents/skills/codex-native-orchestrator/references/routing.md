@@ -2,7 +2,7 @@
 
 After either manual or Ultra activation, conductor assesses multi-role work once; the host dispatches its plan using the same manifest models. Children never delegate. Simple work and root-only stay with the host. User naming of individual roles is not required, but explicit no-tests, no-subagent and read-only instructions remain binding.
 
-Minimize unnecessary work, not useful parallelism. A role type is not a single-use slot: several explorer, researcher or worker instances may address different bounded tasks. Select assignments for the requested result, not to exercise the catalog.
+Minimize unnecessary work, not useful parallelism. Judge scope by the work performed: splitting already requested work among capable agents does not expand scope or require separate approval. A role type is not a single-use slot: several scout, mechanic, explorer or worker instances may address different bounded tasks. Select assignments for the requested result, not to exercise the catalog.
 
 ## Use available capacity
 
@@ -31,8 +31,10 @@ As a child finishes, use its result and fill available capacity with the next re
 | Settle an assigned behavioral question through an existing test or reproduction | tester; actual command and outcome |
 | Execute a necessary exact command list | check_runner; ordered command outcomes, not another tester on the same commands |
 
+Prefer the smallest capable role from the fixed catalog. Use Luna max `scout` for exact retrieval, `mechanic` for prescribed edits and `check_runner` for a necessary exact command list. When several such assignments are independent, dispatch them concurrently instead of keeping them in the host or promoting them to a larger model by default. Do not force uncertain design or implementation into a mechanical packet merely to use Luna; use the appropriate catalog role when its capabilities are needed. Preserve each role's configured model and effort.
+
 Terra assignments need a clear question or expected behavior and relevant context. Unsettled design decisions return to the host or an existing design/diagnostic role before implementation; do not silently change a role's model.
 
 Use independent checks for important changes only when they answer distinct functional questions, such as changed behavior and its direct caller contract. Provide original requirements and source without asking a checker to endorse another conclusion. The host consolidates the grounds; a concrete disputed finding may need finding_validator, not a vote or a new full review.
 
-Inspect source/results and reuse existing observations first. Do not add tests, subagents, security audits, full reviews or refactors for reassurance. A test or specialist must resolve an actual in-scope unknown; prefer an existing focused test, and add a case only for an assigned concrete gap. No routine suites, benchmarks, experiments, extra logs or evidence files. Stop when the question is resolved, reuse unaffected results after repairs, and return scope-expanding proposals to the host before acting.
+Inspect source/results and reuse existing observations first. Do not invent extra work, duplicate checks or add unnecessary tests, security audits, full reviews or refactors for reassurance. This restriction does not limit useful parallel execution of the requested work. An additional diagnostic or checking assignment must resolve an actual in-scope unknown; prefer an existing focused test, and add a case only for an assigned concrete gap. No routine suites, benchmarks, experiments, extra logs or evidence files. Stop when the question is resolved, reuse unaffected results after repairs, and return scope-expanding proposals to the host before acting.

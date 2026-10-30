@@ -1,14 +1,37 @@
-# Harness Orchestration / 多 Harness 角色编排
+# Harness Orchestration
 
-**中文简介：** Codex Native 按需编排原生角色；Codex ZCode 通过电脑控制在 ZCode 桌面派发并行任务、续接任务，并由 Codex 验收结果。仓库还提供独立的 ZCode 角色包和 Qoder 插件。详细文档提供中文与英文。
+**Focused multi-agent workflows for Codex, Qoder, and ZCode.**
 
-**English overview:** Codex Native orchestrates native roles as needed; Codex ZCode uses computer control of the ZCode desktop to dispatch parallel tasks, resume them and have Codex inspect their results. The repository also provides a standalone ZCode role package and a Qoder plugin. Detailed documentation is available in Chinese and English.
+Plan dependencies, delegate independent work, and inspect concrete results—with scoped roles, explicit ownership, and bounded concurrency.
 
-**日本語の概要：** Codex Native は必要に応じてネイティブ役割を編成します。Codex ZCode はコンピューター操作で ZCode デスクトップに並行タスクを依頼・続行し、Codex が結果を確認します。独立した ZCode 役割パッケージと Qoder プラグインも提供します。詳細なドキュメントは中国語と英語です。
+[Quick start](#choose-your-platform) · [中文文档](#中文) · [English guide](#english) · [Changelog](CHANGELOG.md) · [MIT License](LICENSE)
 
-**한국어 소개:** Codex Native는 필요에 따라 네이티브 역할을 조율합니다. Codex ZCode는 컴퓨터 제어로 ZCode 데스크톱에 병렬 작업을 전달하고 이어서 진행하며, Codex가 결과를 확인합니다. 독립적인 ZCode 역할 패키지와 Qoder 플러그인도 제공합니다. 상세 문서는 중국어와 영어로 제공됩니다.
+## Why Harness Orchestration?
 
-[中文](#中文) · [English](#english)
+- **Purpose-built roles:** separate planning, exploration, implementation, review, and targeted verification.
+- **Dependency-aware parallelism:** dispatch ready assignments, reuse suitable agents, and refill available slots without conflicting writes.
+- **Proportionate checking:** one owner per concrete question; no mandatory review chain or full test suite.
+- **Native platform integration:** prompts and configuration for each host, preserving its actual capabilities and user permissions.
+
+## Choose your platform
+
+| Integration | Start here | Execution model |
+| --- | --- | --- |
+| Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to four concurrent subagents |
+| Qoder / Qoder CN | [Plugin installation and Agent Team setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
+| ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; session model inheritance |
+| Codex → ZCode | [Desktop workflow](.agents/skills/codex-zcode/SKILL.md) | Codex coordinates visible ZCode desktop tasks |
+
+Choose only the integration you need. This repository supplies skills, role prompts, and configuration—not a standalone agent runtime. Accounts, model access, and platform permissions remain with the host application.
+
+```text
+User task → Host coordinator → Plan dependencies → Dispatch ready roles → Consolidate results
+                                               ↳ Shared writes stay ordered
+```
+
+**Qoder Agent Team:** the optional core team uses Harness Orchestration as leader, with conductor, explorer, worker, and reviewer as members. The full 14-role catalog remains separate; team membership is not the same as subagent availability. Team setup and selection have been verified locally; calling non-member roles from a team remains unverified. See [validation limits](qoder/README.md#验证边界).
+
+**中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。支持 Qoder 独立角色与核心 Agent Team，保留各平台的模型及权限边界。
 
 ## 中文
 
@@ -94,7 +117,7 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### Qoder 角色编排
 
-[Qoder 安装说明](qoder/README.md)提供 `harness-orchestration` 1.1.0 桌面插件：完整 14 个角色和一个对适合分工的复杂工程任务自动匹配的 skill。角色省略 `model` 以沿用当前对话模型，只读角色没有 Bash/Edit/Write，保留默认一个写入者、最多四个子角色、一个检查负责人和按需最小检查的规则。
+[Qoder 安装说明](qoder/README.md)提供 `harness-orchestration` 1.1.0 桌面插件：完整 14 个角色和一个对适合分工的复杂工程任务自动匹配的 skill。角色省略 `model` 以沿用当前对话模型，只读角色没有 Bash/Edit/Write，支持独立路径并行写入、团队与子智能体合计最多四个并发、每个具体问题一个检查负责人和按需最小检查。
 
 在 Qoder CN 中通过 **Extensions → Plugins → Add Plugin → 上传 Plugin** 导入 ZIP；ZIP 根目录须直接包含 `.qoder-plugin/plugin.json`。为 **Default Agent** 启用本插件后，`UserPromptSubmit` hook 将[默认规则](qoder/harness-orchestration/hooks/default-agent-instructions.txt)加入任务上下文。规则要求先依据当前请求判断；适合分工的复杂工程任务首个工具调用加载完整 skill，随后由插件 Conductor 选角色，在此之前不检索或读取源码；简单任务、`root-only` 和禁止子 Agent 的任务由主 Agent 完成，无需手选入口或另配全局记忆。hook 当前仅用 `cat` 读取插件内静态文本，面向 macOS/Linux，Windows 未验证；实际自动入口检查状态见安装说明。[自定义协调器](qoder/coordinator-instructions.txt) 保留为可选方式。14 角色是可选目录，Team 最多 5 个成员；打包命令及中英文完整步骤见 [Qoder README](qoder/README.md)。
 
@@ -182,7 +205,7 @@ Installation leaves built-in model overrides intact by default. `--model` is opt
 
 ### Qoder role orchestration
 
-The [Qoder package](qoder/README.md) ships a desktop plugin named `harness-orchestration`, at version 1.1.0, with all 14 roles and a skill that automatically matches complex engineering work benefiting from division. Agent `model` fields are omitted to follow the conversation model. Read-only roles have no Bash/Edit/Write tools. The workflow defaults to one writer, at most four children, one checking owner, and minimal checks for concrete unresolved questions.
+The [Qoder package](qoder/README.md) ships a desktop plugin named `harness-orchestration`, at version 1.1.0, with all 14 roles and a skill that automatically matches complex engineering work benefiting from division. Agent `model` fields are omitted to follow the conversation model. Read-only roles have no Bash/Edit/Write tools. Independent owned paths can be implemented concurrently; team and plugin delegation share a four-task limit. Each concrete checking question has one owner.
 
 Import the ZIP in Qoder CN through **Extensions → Plugins → Add Plugin → Upload Plugin**. The ZIP root must directly contain `.qoder-plugin/plugin.json`. Enable the plugin for **Default Agent**; its `UserPromptSubmit` hook adds the [default rule](qoder/harness-orchestration/hooks/default-agent-instructions.txt) to task context. The rule decides from the current request: when division helps, the first tool call loads the full skill, followed by the plugin Conductor selecting roles before any source retrieval or reading; simple tasks, `root-only`, and no-subagent requests stay in the host without a manual picker or separate global-memory setup. The hook uses only `cat` to read packaged static text and targets macOS/Linux; Windows is unverified. See the installation guide for automatic-entry check status. The [custom coordinator](qoder/coordinator-instructions.txt) remains optional. Choose necessary roles from the 14-role catalog; Team supports up to five members. See the [bilingual installation and packaging guide](qoder/README.md).
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Qoder workflow update (2026-10-30)
+
+- Align all 14 Qoder role prompts with current Native responsibilities, inputs, methods, results, and stopping conditions while preserving Qoder model inheritance.
+- Add dependency-aware parallel dispatch, same-role instances, available-slot refill, and one owner per checking question.
+- Document the optional five-person core Agent Team and its shared concurrency budget; distinguish verified setup from unverified non-member dispatch.
+- Refresh the repository introduction and platform navigation.
+
 ## ZCode 1.0.0 — 2026-10-27
 
 - Expand ZCode to ten custom roles plus built-in Explore and general-purpose. Add scout for exact retrieval, mechanic for prescribed edits and check-runner for specified commands; retain session model and thought-level inheritance.

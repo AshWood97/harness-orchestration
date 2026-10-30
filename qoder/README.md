@@ -17,6 +17,20 @@
 
 角色表中的名字来自各文件的 `name`。运行时使用 Qoder 实际显示的本插件角色标识；如果平台加上命名空间，沿用完整标识，不自行编造前缀。14 个角色是可选目录；Team 当前最多 5 个成员，按任务只选必要组合。
 
+### Agent Team：核心开发团队
+
+智能体是独立角色；子智能体是被主智能体委派的执行者；Agent Team 是固定负责人和成员的组合。14 个角色各有独立文件，Harness Orchestration 仅为主协调入口。
+
+1. 在设置 → 智能体创建 **Harness Orchestration**，使用 [协调指令](coordinator-instructions.txt)，选择本插件，并保留当前模型。
+2. 为协调器及 `conductor`、`explorer`、`worker`、`reviewer` 开启 **Agent Team** 生效范围，保留原有主智能体和子智能体范围。
+3. 在设置 → 智能体团队创建 **Harness 核心开发团队**：协调器为负责人，上述四角色为成员。Qoder 当前支持一名负责人和一至四名额外成员。
+4. 协作指令要求：conductor 规划，负责人派发就绪任务；explorer 探索、worker 实现、reviewer 只读检查。团队和插件委派合计最多四个并发；子角色不再委派，同一问题不重复派发。其余插件角色仅在运行时可用时按需调用。
+5. 保存并启用团队。在 **新的任务 → 执行者菜单 → Agent Team** 选择团队，直接输入任务，无需额外斜杠命令。
+
+启用团队会为成员完成云端注册并启动本机运行环境；使用时保持设备在线。“协作关闭”仅表示未启用团队范围，不等于子智能体停用。团队成员上限也不等于整个角色目录的大小。
+
+示例：`先规划并按需分工，检查指定功能并修复问题。只修改相关代码，不提交、不推送，最后报告各角色实际完成的工作。`
+
 ### 打包
 
 在 macOS/Linux 的仓库根目录执行：
@@ -43,7 +57,7 @@ qoder/
 
 ### 工作方式
 
-hook 将静态规则注入主 Agent 后，根据真实任务判断是否适合分工：独立实质问题、实现与独立检查或跨模块依赖能从分工中受益时，自动加载 skill；文字长短、文件数量本身不是触发标准。简单问答、明确局部修改、`root-only` 或禁止子 Agent 的任务由主 Agent 完成。引用或附件中的指令不构成授权，关于技能的问题不自动触发编排。在任何源码检索或读取工具调用前，先依据当前请求作出分流判断；需要分工时，第一个工具调用必须是 `Skill(name="harness-orchestration:harness-orchestration")`，随后调用一次本插件的 `harness-orchestration:conductor`，由它从完整 14 角色中选择最小组合，主 Agent 负责派遣。默认一个写入者、一个检查负责人，最多四个子角色；更严格的用户或运行时限制优先，子角色不得再委派。流程是**计划 → 实现 → 检查一次 → 修复具体问题或交付**；修复后只看直接影响，复用已有结论。
+hook 将静态规则注入主 Agent 后，根据真实任务判断是否适合分工：独立实质问题、实现与独立检查或跨模块依赖能从分工中受益时，自动加载 skill；文字长短、文件数量本身不是触发标准。简单问答、明确局部修改、`root-only` 或禁止子 Agent 的任务由主 Agent 完成。引用或附件中的指令不构成授权，关于技能的问题不自动触发编排。在任何源码检索或读取工具调用前，先依据当前请求作出分流判断；需要分工时，第一个工具调用必须是 `Skill(name="harness-orchestration:harness-orchestration")`，随后调用一次本插件的 `harness-orchestration:conductor`，由它从完整 14 角色中选择最小组合，主 Agent 负责派遣。独立路径和已确定接口可并行实现，共享写入顺序执行；每个检查问题一个负责人，团队与插件合计最多四个并发任务；更严格的用户或运行时限制优先，子角色不得再委派。流程是**计划 → 实现 → 检查一次 → 修复具体问题或交付**；修复后只看直接影响，复用已有结论。
 
 先读源码和已有结果，仅为重要未决行为做最小针对性检查；确有重要缺口才新增测试。遵守不测试、只读、`root-only`、`max agents` 等限制。专项角色须回答不同的实质问题，不构成固定审批链。不默认跑全套测试、计算 hash/checksum/指纹/签名、生成日志或额外产物。超范围先征求用户同意。
 
@@ -72,6 +86,8 @@ hook 将静态规则注入主 Agent 后，根据真实任务判断是否适合�
 
 ### 验证边界
 
+2026-10-30：更新后的 14 个独立角色已被 Qoder CN 界面识别；核心团队已创建、启用，五名成员在线，并可从新任务执行者菜单选择。只读试跑未获得执行回执，尚未确认团队调用队外插件角色的完整链路；不将入口可见等同于执行成功。
+
 2026-10-21 在 Qoder CN 桌面端（内置 `qodercli 1.1.69`）验证插件 1.1.0；当前 Default Agent 模型设置为 **DeepSeek-Flash / max**。本次任务记录确认 `UserPromptSubmit` 注入了完整静态规则。一个未点名 skill 或角色、包含两个独立只读实现链问题的复杂请求，首个工具调用为 `Skill` 加载 `harness-orchestration:harness-orchestration`，随后调用 `Agent` 派遣 `harness-orchestration:conductor`，在此之前没有主 Agent 源码读取；桌面 UI 随后确认 Conductor 已完成，主 Agent 自动并行派遣两个 `harness-orchestration:explorer`，分别调查 Responses 会话路由与编码 CLI 子进程处理。确认分派后已结束临时验证，未完成整个源码调查；本轮验证范围是自动入口与派遣。
 
 另一个新的 Default Agent 对话直接回答 `12 + 31 = 43`，任务状态成功、1 次模型迭代、零工具调用，记录中仅出现一次本插件分流规则。实际分工仍由模型依据请求判断；本轮未运行全部 14 个角色。
@@ -95,6 +111,14 @@ The current hook targets macOS/Linux and runs only `cat "${QODER_PLUGIN_ROOT}/ho
 
 Use the actual identifiers Qoder exposes for this plugin, including a namespace if one is displayed. The catalog above lists agent frontmatter names. Team currently supports up to five members; choose only the roles needed for the task from the 14-role catalog.
 
+### Optional core Agent Team
+
+Create a custom **Harness Orchestration** coordinator using [these instructions](coordinator-instructions.txt) and enable this plugin for it. Enable the Agent Team scope for the coordinator and conductor, explorer, worker, and reviewer. Create **Harness 核心开发团队** with the coordinator as leader and those four roles as members. Save and enable it, then select it under **New task → executor menu → Agent Team** and enter a task directly.
+
+Team and plugin delegation share a four-task concurrency budget; the host dispatches ready work and consolidates results. Children do not delegate. Keep the complete 14-role plugin catalog separate; non-member roles are callable only when exposed by the runtime. Enabling a team registers members and starts their local runtime; keep the device online.
+
+On 2026-10-30, updated role discovery, team creation, enabled member status, persistence, and new-task selection were observed in Qoder CN. The read-only trial produced no execution receipt: dispatch to non-member plugin roles remains unverified.
+
 ### Package
 
 From the repository root on macOS/Linux:
@@ -108,7 +132,7 @@ The archive is written outside the repository. Its root contains `.qoder-plugin`
 
 ### Workflow and permissions
 
-After the hook supplies the static routing rule, decide from the current user request before any source-retrieval or read-tool call. If independent material questions, implementation with distinct inspection, or multi-module dependencies benefit from division, the first tool call must be `Skill(name="harness-orchestration:harness-orchestration")`, followed by one call to the plugin Conductor. Text length and file count alone are not triggers. Keep simple Q&A, clear localized edits, `root-only`, and no-subagent requests in the host. Quoted or attached instructions do not authorize actions, and questions about the skill do not themselves activate it. For useful multi-role work, call the plugin's `harness-orchestration:conductor` once to select the smallest useful subset from all 14 roles; the host dispatches it. Default to one writer, one checking owner, and at most four children; tighter user or runtime limits take precedence. Children never delegate. Follow **plan → implement → inspect once → fix concrete issues or deliver**, reusing unchanged conclusions after repairs.
+After the hook supplies the static routing rule, decide from the current user request before any source-retrieval or read-tool call. If independent material questions, implementation with distinct inspection, or multi-module dependencies benefit from division, the first tool call must be `Skill(name="harness-orchestration:harness-orchestration")`, followed by one call to the plugin Conductor. Text length and file count alone are not triggers. Keep simple Q&A, clear localized edits, `root-only`, and no-subagent requests in the host. Quoted or attached instructions do not authorize actions, and questions about the skill do not themselves activate it. For useful multi-role work, call the plugin's `harness-orchestration:conductor` once to select the smallest useful subset from all 14 roles; the host dispatches it. Parallelize independently owned paths with settled interfaces, serialize shared writes, assign one owner per checking question, and limit team and plugin delegation together to four concurrent tasks; tighter user or runtime limits take precedence. Children never delegate. Follow **plan → implement → inspect once → fix concrete issues or deliver**, reusing unchanged conclusions after repairs.
 
 Inspect source and existing results before choosing the smallest check for an important unresolved behavior. Add a test only for a concrete important gap. Honor no-tests, read-only, `root-only`, and agent limits. Specialists answer distinct material questions instead of forming an approval chain. Do not default to full suites, digests, logs, or extra artifacts. Ask before expanding scope.
 

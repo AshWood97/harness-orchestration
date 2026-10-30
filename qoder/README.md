@@ -4,11 +4,13 @@
 
 ## 中文
 
-**使用插件宿主 `orchestrator`，在一个会话中按需调用 14 个独立专业角色。** 插件 v1.1.1 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色。保留当前会话模型/provider，不复制 Codex 模型配置。
+**使用插件宿主 `orchestrator`，在一个会话中按需调用 14 个独立专业角色。** 插件 v1.1.2 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色。保留当前会话模型/provider，不复制 Codex 模型配置。
+
+[下载 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)
 
 ### 安装与新会话调用
 
-1. 导入 v1.1.1 插件包，ZIP 根目录直接包含 `.qoder-plugin/plugin.json`。
+1. 从 [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) 下载并导入插件 ZIP；ZIP 根目录直接包含 `.qoder-plugin/plugin.json`。
 2. 新建会话，在顶部 Agent 选择器选择 **orchestrator**，描述为“主协调器（插件宿主）”。不要选择用户级 **Harness Orchestration** 来直接派发插件角色。
 3. 首条消息先自检，确认实际工具暴露插件角色，再开始任务：
 
@@ -23,13 +25,13 @@ harness-orchestration:reviewer 等 14 个插件角色。
 
 也可以先只发送自检，看到实际角色清单后再提交任务。不要将提示词中的角色名字当作可用性证据。
 
-若选择器未出现宿主，可让具备 `create_chat_session` 工具的 Qoder 会话使用以下已验证的本地安装标识创建会话：
+若选择器未出现宿主，先确认插件已安装并启用，再新建会话检查。此前的本地安装中，用户也曾明确要求另一个具备 `create_chat_session` 工具的 Qoder 会话，使用以下标识创建宿主会话：
 
 ```text
 agent-definition:["plugin","harness-orchestration@local","orchestrator"]
 ```
 
-例如：“用 orchestrator 开一个新会话，任务是……”。此 ID 适用于 `@local` 安装；其他安装来源必须使用运行时实际暴露的 ID。该创建方式在本次用户环境中继承 `dfmodel`，没有切换模型/provider。已有正确宿主会话也可继续复用。
+例如：“用 orchestrator 开一个新会话，任务是……”。此 ID 适用于当时的 `@local` 安装；其他安装来源必须使用运行时实际暴露的 ID。该创建方式在当时用户环境中继承 `dfmodel`，没有切换模型/provider。已有正确宿主会话也可继续复用。插件入口、roster、所需角色或运行时不可用时，v1.1.2 要求当前宿主报告限制并停止或询问，不得自行换入口、换宿主、换角色或自动重试；用户另行明确请求创建会话属于单独操作。
 
 ### 为什么之前的入口不成功
 
@@ -44,11 +46,19 @@ agent-definition:["plugin","harness-orchestration@local","orchestrator"]
 
 ### 数量、并发与验证边界
 
-用户于 **2026-10-30** 提供的真实运行结果：宿主会话暴露 18 个可派发类型，包含 `general-purpose`、`Explore`、`Plan`、用户级 `Harness Orchestration`，以及 14 个 `harness-orchestration:<role>`。按 **4/4/4/4/2** 五批派发 18 次，检查了 18 份子会话 transcript、工具状态 `ok` 和最后回复：**18/18 成功，0 失败**。
+用户于 **2026-10-30** 提供的 **v1.1.1** 真实运行结果：宿主会话暴露 18 个可派发类型，包含 `general-purpose`、`Explore`、`Plan`、用户级 `Harness Orchestration`，以及 14 个 `harness-orchestration:<role>`。按 **4/4/4/4/2** 五批派发 18 次，检查了 18 份子会话 transcript、工具状态 `ok` 和最后回复：**18/18 成功，0 失败**。
 
 这是用户报告的实际验证，本次文档同步没有重新执行这些调用，也不公开私人 transcript 或会话 ID。18 是该环境的类型数量，不是保证所有安装都有 18 类型；10+ 表示一个会话累计调用数量，不是同时运行数量。团队与插件委派合计最多四个并发，并服从实际运行时更低上限。
 
 真实任务只选择必要角色，通常 conductor、explorer、worker、reviewer 即可。独立就绪任务可并行，同角色可有多个独立实例，槽位空出后及时补充；共享写入和未确定接口按顺序执行。子角色不继续委派，每个检查问题一个负责人。检查只读，仅为具体未决行为安排最小必要测试。
+
+### 中断、继续与写入恢复
+
+v1.1.2 将恢复规则写入插件：手动中断后等待用户明确要求继续；即使只发送“继续”，也复用有效计划、已完成结果、任务状态和文件归属，不重复派发已完成或仍在运行的任务。只补派依赖已满足的未完成任务，按实际空闲槽位推进。切换模型不代表权限变化，也不直接沿用旧模型对失败原因的判断。
+
+写入任务重派前核对归属路径和实际改动：已完成的不重写，部分完成只补剩余内容，状态不明先核对；共享路径继续串行。明确权限拒绝、用户明确取消整个任务或运行时不可用时停止或询问，不自动重试；无法确定任务状态时先核对，仍不能确定则询问。`interrupted`、`cancelled` 或 `failed` 等文本本身不等于权限拒绝或用户明确取消。
+
+[同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)提供中断、可选换模型、发送“继续”的测试步骤和预期结果；本次同步没有重新运行这些恢复测试，不能将 v1.1.1 的派发结果当作 v1.1.2 恢复测试通过的证据。
 
 ### 插件更新与旧快照
 
@@ -68,7 +78,7 @@ Agent Team 是固定负责人和成员组合，当前配置界面支持一名负
 
 ```sh
 cd qoder/harness-orchestration
-zip -r /tmp/harness-orchestration-qoder-1.1.1.zip .qoder-plugin agents skills hooks LICENSE
+zip -r /tmp/harness-orchestration-qoder-1.1.2.zip .qoder-plugin agents skills hooks LICENSE
 ```
 
 不要在 ZIP 外包一层目录。hook 使用 `cat` 读取静态规则；Windows 尚未验证。
@@ -99,19 +109,27 @@ zip -r /tmp/harness-orchestration-qoder-1.1.1.zip .qoder-plugin agents skills ho
 
 ### Start with the plugin host
 
-Version **1.1.1** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Import the plugin, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster.
+Version **1.1.2** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Download the package from the [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2), import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) includes installation, verification prompts and troubleshooting.
 
 Before assigning work, ask the host to list the agent types actually exposed by its tools. Confirm all 14 `harness-orchestration:<role>` identifiers. Use full namespaced identifiers, not bare names such as `conductor`. Missing types must be reported, never simulated or silently replaced with built-ins.
 
-If the UI does not list the host, a Qoder session with `create_chat_session` may use `agent-definition:["plugin","harness-orchestration@local","orchestrator"]`. This identifier was verified for a local installation; resolve the actual ID for other installation sources. The reported session inherited its existing model (`dfmodel`) without provider changes.
+If the UI does not list the host, first confirm the plugin is installed and enabled, then check a new session. In a previous local installation, the user explicitly asked another Qoder session with `create_chat_session` to create a host using `agent-definition:["plugin","harness-orchestration@local","orchestrator"]`. Resolve the actual ID for other installation sources. That reported session inherited its existing model (`dfmodel`) without provider changes. Under v1.1.2, the current host must report an unavailable entry, roster, required role or runtime and stop or ask; it must not automatically switch entry, host or role, or retry. A user separately requesting a new session is a distinct action.
 
 ### Observed behavior and evidence
 
 In the user's Qoder CN environment, the user-level session had empty setting sources and only three built-ins plus itself. The plugin host loaded the `user` settings source and exposed those four types plus 14 plugin roles. UI visibility is not proof of runtime availability.
 
-On **2026-10-30**, the user reported **18 real Agent calls and 18 child transcripts**, in batches of **4/4/4/4/2**, with all tool statuses `ok` and final replies checked: **18 passed, zero failed**. This documentation update did not rerun the experiment or publish private session data. Eighteen available types is environment-specific; 10+ cumulative calls does not mean 10+ concurrent agents.
+On **2026-10-30**, the user reported **18 real Agent calls and 18 child transcripts with v1.1.1**, in batches of **4/4/4/4/2**, with all tool statuses `ok` and final replies checked: **18 passed, zero failed**. This documentation update did not rerun the experiment or publish private session data. Eighteen available types is environment-specific; 10+ cumulative calls does not mean 10+ concurrent agents.
 
 Keep at most four delegated tasks running across team and plugin calls, subject to lower runtime limits. Choose only necessary roles, allow independent instances, refill available slots, serialize shared writes, and prohibit child delegation. Use one owner per checking question and minimal targeted verification.
+
+### Resume and recovery
+
+The v1.1.2 instructions wait for a user's explicit request to resume after manual interruption. Reuse a valid plan, completed results, assignment states and owned paths; do not redispatch completed or still-running work. Resume only unfinished tasks whose dependencies are complete, using actual free slots. A model switch is not a permission change, and the new model should not inherit the previous model's judgment about a failure.
+
+Before redispatching a write, inspect owned paths and actual changes: preserve completed work, finish only the remaining edits, and reconcile unknown states first. Keep shared writes serial. Explicit permission denial, explicit cancellation of the entire task, or runtime unavailability requires stopping or asking rather than automatic retry; if the state cannot be determined, ask. `interrupted`, `cancelled`, or `failed` text alone does not establish permission denial or explicit user cancellation.
+
+The [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) gives steps and expected outcomes for interruption, an optional model switch and “继续” (continue). Those recovery scenarios were not rerun in this documentation update; the v1.1.1 dispatch result does not prove v1.1.2 recovery behavior.
 
 ### Updating and teams
 

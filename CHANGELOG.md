@@ -1,5 +1,11 @@
 # Changelog
 
+## Qoder 1.1.2 — 2026-10-30
+
+- Resume from a usable plan, preserving completed and running assignments; dispatch only unfinished work whose dependencies are complete.
+- Check owned paths and actual changes before resuming writes; a model switch does not imply a permission change.
+- Stop or ask on hard blockers. Do not automatically switch roles, entrypoints, or hosts, or retry.
+
 ## Qoder 1.1.1 — 2026-10-30
 
 - Add the plugin-host orchestrator and register 15 definitions: one host plus 14 specialists.

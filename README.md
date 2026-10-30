@@ -18,7 +18,7 @@ Plan dependencies, delegate independent work, and inspect concrete results—wit
 | Integration | Start here | Execution model |
 | --- | --- | --- |
 | Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to four concurrent subagents |
-| Qoder / Qoder CN | [Plugin installation and Agent Team setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
+| Qoder / Qoder CN | [Plugin host setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
 | ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; session model inheritance |
 | Codex → ZCode | [Desktop workflow](.agents/skills/codex-zcode/SKILL.md) | Codex coordinates visible ZCode desktop tasks |
 
@@ -29,7 +29,7 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
                                                ↳ Shared writes stay ordered
 ```
 
-**Qoder v1.1.1:** select the plugin-host **orchestrator** for the complete 14-role catalog. A user-reported run completed 18 real delegations in batches of 4/4/4/4/2. This validates the host session, not the earlier user-level Agent Team. [Quick start and evidence boundaries](qoder/README.md).
+**Qoder v1.1.2:** select the plugin-host **orchestrator** for the complete 14-role catalog. Resume instructions preserve valid plans and results after interruption or a model switch. A user-reported **v1.1.1** run completed 18 real delegations in batches of 4/4/4/4/2; that result does not validate the v1.1.2 recovery scenarios or the earlier user-level Agent Team. [Download the release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Quick start and evidence boundaries](qoder/README.md).
 
 **中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。支持 Qoder 独立角色与核心 Agent Team，保留各平台的模型及权限边界。
 
@@ -117,9 +117,9 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### Qoder 角色编排
 
-[Qoder v1.1.1](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。
+[Qoder v1.1.2](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。[下载 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](qoder/Harness-Orchestration-1.1.2-同事复用指南.md)
 
-用户报告同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发。保持当前模型/provider，共享写入串行、子角色不再委派。修改插件后升版本并重装，再验证新会话；只切开关可能复用旧 roster。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
+用户报告 **v1.1.1** 的同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发。v1.1.2 在中断或换模型后按用户要求复用有效计划与结果，仅恢复未完成任务；重派写入前核对实际文件，明确权限拒绝、用户取消或运行时不可用时停止或询问。指南提供恢复测试步骤，但本次未重新运行验证。保持当前模型/provider，共享写入串行、子角色不再委派。修改插件后升版本并重装，再验证新会话；只切开关可能复用旧 roster。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
 
 ### 公开仓库与验证范围
 
@@ -205,9 +205,9 @@ Installation leaves built-in model overrides intact by default. `--model` is opt
 
 ### Qoder role orchestration
 
-The [v1.1.1 plugin](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host.
+The [v1.1.2 plugin](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host. [Download the release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Colleague guide](qoder/Harness-Orchestration-1.1.2-同事复用指南.md).
 
-The user reported 18 successful real delegations in one host session, batched with at most four concurrent tasks. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
+The user reported 18 successful real delegations with **v1.1.1** in one host session, batched with at most four concurrent tasks. In v1.1.2, resumption after interruption or a model switch reuses valid plans and results, dispatches only unfinished work, and checks actual file changes before redispatching writes. Explicit permission denial, user cancellation or runtime unavailability requires stopping or asking. The guide provides recovery test steps; those scenarios were not rerun for this update. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
 
 ### Public repository and verification limits
 

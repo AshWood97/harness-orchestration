@@ -29,7 +29,7 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
                                                ↳ Shared writes stay ordered
 ```
 
-**Qoder Agent Team:** the optional core team uses Harness Orchestration as leader, with conductor, explorer, worker, and reviewer as members. The full 14-role catalog remains separate; team membership is not the same as subagent availability. Team setup and selection have been verified locally; calling non-member roles from a team remains unverified. See [validation limits](qoder/README.md#验证边界).
+**Qoder v1.1.1:** select the plugin-host **orchestrator** for the complete 14-role catalog. A user-reported run completed 18 real delegations in batches of 4/4/4/4/2. This validates the host session, not the earlier user-level Agent Team. [Quick start and evidence boundaries](qoder/README.md).
 
 **中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。支持 Qoder 独立角色与核心 Agent Team，保留各平台的模型及权限边界。
 
@@ -117,9 +117,9 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### Qoder 角色编排
 
-[Qoder 安装说明](qoder/README.md)提供 `harness-orchestration` 1.1.0 桌面插件：完整 14 个角色和一个对适合分工的复杂工程任务自动匹配的 skill。角色省略 `model` 以沿用当前对话模型，只读角色没有 Bash/Edit/Write，支持独立路径并行写入、团队与子智能体合计最多四个并发、每个具体问题一个检查负责人和按需最小检查。
+[Qoder v1.1.1](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。
 
-在 Qoder CN 中通过 **Extensions → Plugins → Add Plugin → 上传 Plugin** 导入 ZIP；ZIP 根目录须直接包含 `.qoder-plugin/plugin.json`。为 **Default Agent** 启用本插件后，`UserPromptSubmit` hook 将[默认规则](qoder/harness-orchestration/hooks/default-agent-instructions.txt)加入任务上下文。规则要求先依据当前请求判断；适合分工的复杂工程任务首个工具调用加载完整 skill，随后由插件 Conductor 选角色，在此之前不检索或读取源码；简单任务、`root-only` 和禁止子 Agent 的任务由主 Agent 完成，无需手选入口或另配全局记忆。hook 当前仅用 `cat` 读取插件内静态文本，面向 macOS/Linux，Windows 未验证；实际自动入口检查状态见安装说明。[自定义协调器](qoder/coordinator-instructions.txt) 保留为可选方式。14 角色是可选目录，Team 最多 5 个成员；打包命令及中英文完整步骤见 [Qoder README](qoder/README.md)。
+用户报告同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发。保持当前模型/provider，共享写入串行、子角色不再委派。修改插件后升版本并重装，再验证新会话；只切开关可能复用旧 roster。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
 
 ### 公开仓库与验证范围
 
@@ -205,9 +205,9 @@ Installation leaves built-in model overrides intact by default. `--model` is opt
 
 ### Qoder role orchestration
 
-The [Qoder package](qoder/README.md) ships a desktop plugin named `harness-orchestration`, at version 1.1.0, with all 14 roles and a skill that automatically matches complex engineering work benefiting from division. Agent `model` fields are omitted to follow the conversation model. Read-only roles have no Bash/Edit/Write tools. Independent owned paths can be implemented concurrently; team and plugin delegation share a four-task limit. Each concrete checking question has one owner.
+The [v1.1.1 plugin](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host.
 
-Import the ZIP in Qoder CN through **Extensions → Plugins → Add Plugin → Upload Plugin**. The ZIP root must directly contain `.qoder-plugin/plugin.json`. Enable the plugin for **Default Agent**; its `UserPromptSubmit` hook adds the [default rule](qoder/harness-orchestration/hooks/default-agent-instructions.txt) to task context. The rule decides from the current request: when division helps, the first tool call loads the full skill, followed by the plugin Conductor selecting roles before any source retrieval or reading; simple tasks, `root-only`, and no-subagent requests stay in the host without a manual picker or separate global-memory setup. The hook uses only `cat` to read packaged static text and targets macOS/Linux; Windows is unverified. See the installation guide for automatic-entry check status. The [custom coordinator](qoder/coordinator-instructions.txt) remains optional. Choose necessary roles from the 14-role catalog; Team supports up to five members. See the [bilingual installation and packaging guide](qoder/README.md).
+The user reported 18 successful real delegations in one host session, batched with at most four concurrent tasks. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
 
 ### Public repository and verification limits
 

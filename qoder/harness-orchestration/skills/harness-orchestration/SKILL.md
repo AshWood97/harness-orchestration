@@ -1,6 +1,6 @@
 ---
 name: harness-orchestration
-version: 1.1.0
+version: 1.1.1
 description: Automatically coordinate complex engineering tasks when independent material questions, implementation with distinct inspection, or multi-module dependencies benefit from division. Keep simple Q&A and clear localized edits in the host.
 description_zh: 复杂工程任务适合分工时自动编排，由规划者按需选角色；简单问答和明确局部修改由主 Agent 完成。
 user-invocable: true

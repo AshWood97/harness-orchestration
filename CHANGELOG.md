@@ -1,5 +1,12 @@
 # Changelog
 
+## Qoder 1.1.1 — 2026-10-30
+
+- Add the plugin-host orchestrator and register 15 definitions: one host plus 14 specialists.
+- Correct the recommended entrypoint: user-level agent sessions and plugin-host sessions may load different agent rosters.
+- Document the user-reported 18/18 dispatch result, four-task concurrency limit, namespaced identifiers, and version-bump/reinstall procedure.
+- Distinguish successful host-session dispatch from the earlier unverified Agent Team path; omit private session identifiers and transcripts.
+
 ## Unreleased — Qoder workflow update (2026-10-30)
 
 - Align all 14 Qoder role prompts with current Native responsibilities, inputs, methods, results, and stopping conditions while preserving Qoder model inheritance.

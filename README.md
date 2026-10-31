@@ -19,7 +19,7 @@ Plan dependencies, delegate independent work, and inspect concrete results—wit
 | --- | --- | --- |
 | Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to four concurrent subagents |
 | Qoder / Qoder CN | [Plugin host setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
-| ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; session model inheritance |
+| ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; Turbo default and optional Classic profile |
 | Codex → ZCode | [Desktop workflow](.agents/skills/codex-zcode/SKILL.md) | Codex coordinates visible ZCode desktop tasks |
 
 Choose only the integration you need. This repository supplies skills, role prompts, and configuration—not a standalone agent runtime. Accounts, model access, and platform permissions remain with the host application.
@@ -31,7 +31,7 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
 
 **Qoder v1.1.2:** select the plugin-host **orchestrator** for the complete 14-role catalog. Resume instructions preserve valid plans and results after interruption or a model switch. A user-reported **v1.1.1** run completed 18 real delegations in batches of 4/4/4/4/2; that result does not validate the v1.1.2 recovery scenarios or the earlier user-level Agent Team. [Download the release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Quick start and evidence boundaries](qoder/README.md).
 
-**中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。支持 Qoder 独立角色与核心 Agent Team，保留各平台的模型及权限边界。
+**中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。ZCode 可按需选择 Classic 或 Turbo；各平台保留自己的模型及权限边界。
 
 ## 中文
 
@@ -111,9 +111,9 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### ZCode 角色编排
 
-[ZCode 角色包](zcode/README.md) v1.0.0 独立于 Codex ZCode 接入，提供十个自定义角色和内置 Explore、general-purpose，共十二种。新增 scout、mechanic、check-runner，分别承担精确检索、按步骤修改和指定命令执行。模型与思考等级默认继承当前会话。主 Agent 规划、派发并整合；最多并发四个子代理，允许同角色多个独立实例并接续空位。提示词明确职责、输入、方法、结果、停止条件和执行边界，每个检查问题一个负责人。
+[ZCode 角色包](zcode/README.md)独立于 Codex ZCode 桌面接入，提供十个自定义角色和 Explore、general-purpose 两个内置角色。默认的 Turbo 2.0 提供分层分流与可裁剪的四波协作模板，可切换到 Classic 关闭 Turbo。主 Agent 按实际依赖派发最多四个并发子角色，并锁定接口和文件归属；不为凑波次增加未授权的测试或审查。
 
-安装器默认不改内置角色的模型覆盖。`--model` 是可选覆盖，`--thought-level` 仅与 `--model` 一起使用；需要清理内置模型覆盖时明确传入 `--reset-builtin-models`。带标记的工作流合并保留个人规则，不计算 hash 或生成备份凭据；完整命令见 [ZCode 安装说明](zcode/README.md)。
+安装器先预览并保留主规则受管区块外的个人内容，默认保留角色已有模型设置。Turbo 角色关闭 `injectAgentsMd`，主 Agent 必须在派单中传递适用项目与用户约束。配置和切换步骤见 [ZCode 安装说明](zcode/README.md)。
 
 ### Qoder 角色编排
 
@@ -199,9 +199,9 @@ The old persistent CLI runner, hash evidence machinery and automatic final gate 
 
 ### ZCode role orchestration
 
-The [ZCode role package](zcode/README.md) v1.0.0 is independent of the Codex ZCode integration. It supplies ten custom roles plus built-in Explore and general-purpose, for twelve role types. New scout, mechanic and check-runner roles handle exact retrieval, prescribed edits and specified commands. Models and thought levels inherit the session by default. The host plans, dispatches and consolidates up to four concurrent subagents, including multiple independent instances of a role, and refills freed slots. Prompts define responsibility, inputs, method, result, stopping conditions and execution boundaries; each checking question has one owner.
+The [ZCode role package](zcode/README.md) is independent of the Codex ZCode desktop integration. It supplies ten custom roles plus Explore and general-purpose. Turbo 2.0 is the default, with tiered routing and an adaptable four-wave workflow; select Classic to turn Turbo off. The host dispatches up to four ready subagents, settles interfaces and owned paths, and avoids unrequested tests or reviews.
 
-Installation leaves built-in model overrides intact by default. `--model` is optional, and `--thought-level` requires `--model`; explicitly use `--reset-builtin-models` to clear built-in model overrides. Marked guidance preserves surrounding personal rules without hashes or backup receipts. See the [ZCode installation guide](zcode/README.md) for commands.
+The installer previews changes, preserves personal guidance outside its managed block and keeps existing role model choices by default. Turbo roles disable `injectAgentsMd`, so the host must include applicable project and user constraints in each assignment. See the [ZCode installation guide](zcode/README.md).
 
 ### Qoder role orchestration
 

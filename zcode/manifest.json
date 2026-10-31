@@ -1,5 +1,5 @@
 {
-  "package_version": "1.0.0",
+  "package_version": "2.0.0",
   "custom_roles": [
     "code-reviewer",
     "debugger",
@@ -35,5 +35,10 @@
   "role_selection": "host-planner-selects-bounded-assignments-same-role-multiple-instances",
   "testing_policy": "minimal-targeted-only-for-important-unresolved-behavior",
   "parallel_dispatch": "fill-available-four-subagent-capacity-with-independent-ready-work",
-  "cross_checks": "distinct-concrete-functional-questions-only"
+  "cross_checks": "distinct-concrete-functional-questions-only",
+  "default_profile": "turbo",
+  "profiles": {
+    "turbo": "profiles/turbo",
+    "classic": "."
+  }
 }

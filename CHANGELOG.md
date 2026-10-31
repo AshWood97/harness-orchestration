@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — ZCode Turbo 2.0
+
+- Make Turbo the default profile with tiered routing and an adaptable four-wave workflow; allow switching back to Classic and choose only work needed for each task.
+- Dispatch independent ready work within runtime capacity, settle interfaces and owned paths before parallel writes, and avoid default extra tests or reviews.
+- Disable `injectAgentsMd` for Turbo roles; the host passes applicable user and project instructions with each assignment.
+- Preserve existing role Markdown model fields and UI model selections by default; retain explicit model overrides and managed-block merging.
+
 ## Qoder 1.1.2 — 2026-10-30
 
 - Resume from a usable plan, preserving completed and running assignments; dispatch only unfinished work whose dependencies are complete.

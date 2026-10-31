@@ -22,22 +22,20 @@ BUILTIN_OVERRIDE_FIELDS = ('builtInModelOverrides', 'builtInThoughtLevelOverride
 
 
 
-def is_legacy_role(original, template):
-    """Recognize the shipped role with only its old model fields added."""
-    original = original.replace(b'\r\n', b'\n')
-    template = template.replace(b'\r\n', b'\n')
-    lines = original.splitlines(keepends=True)
+def split_role_selection(original):
+    """Separate existing model choices from the rest of a role definition."""
+    lines = original.replace(b'\r\n', b'\n').splitlines(keepends=True)
     if not lines or lines[0] != b'---\n':
-        return False
+        return b''.join(lines), b''
     try:
         end = lines.index(b'---\n', 1)
     except ValueError:
-        return False
-    model_lines = [line for line in lines[1:end] if line.startswith(b'model:')]
-    if len(model_lines) != 1:
-        return False
-    return b''.join(line for index, line in enumerate(lines)
-                    if not (0 < index < end and line.startswith((b'model:', b'thoughtLevel:')))) == template
+        return b''.join(lines), b''
+    selection = b''.join(line for line in lines[1:end]
+                         if line.startswith((b'model:', b'thoughtLevel:')))
+    content = b''.join(line for index, line in enumerate(lines)
+                       if not (0 < index < end and line.startswith((b'model:', b'thoughtLevel:'))))
+    return content, selection
 
 
 def reset_builtin_overrides(original):
@@ -94,7 +92,9 @@ def atomic_write(path, data, mode=0o600):
 
 
 def configure(home, model=None, *, thought_level=None, apply=False,
-              replace_existing=False, reset_builtin_models=False):
+              replace_existing=False, reset_builtin_models=False, profile='turbo'):
+    if profile not in ('classic', 'turbo'):
+        raise ValueError('Choose profile classic or turbo')
     if model is not None and not re.fullmatch(r'[A-Za-z0-9_.:-]+/[A-Za-z0-9_.:-]+', model):
         raise ValueError('Use the ZCode provider-id/model-id shown in your model settings')
     if thought_level is not None:
@@ -106,11 +106,12 @@ def configure(home, model=None, *, thought_level=None, apply=False,
     agents = home / 'agents'
     if agents.is_symlink():
         raise ValueError('Refusing a symlinked agents directory')
+    profile_dir = PACKAGE if profile == 'classic' else PACKAGE / 'profiles' / profile
     plans = []
     templates = {}
     for role in ROLES:
         path = agents / (role + '.md')
-        template = (PACKAGE / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
+        template = (profile_dir / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
         templates[path] = template
         selection = ''
         if model is not None:
@@ -122,7 +123,7 @@ def configure(home, model=None, *, thought_level=None, apply=False,
     guidance = home / 'AGENTS.md'
     original_guidance = read_target(guidance)
     originals = {guidance: original_guidance}
-    plans.append((guidance, merge_guidance(original_guidance or b'', (PACKAGE / 'AGENTS.md').read_bytes())))
+    plans.append((guidance, merge_guidance(original_guidance or b'', (profile_dir / 'AGENTS.md').read_bytes())))
     if reset_builtin_models:
         state = home / 'v2' / 'agents-state.json'
         if state.parent.is_symlink():
@@ -135,14 +136,20 @@ def configure(home, model=None, *, thought_level=None, apply=False,
     conflicts = []
     for path, data in plans:
         original = originals[path] if path in originals else read_target(path)
+        if path in templates and original is not None:
+            content, existing_selection = split_role_selection(original)
+            if model is None:
+                if content == templates[path]:
+                    continue
+                data = templates[path].replace(b'---\n', b'---\n' + existing_selection, 1)
         if original == data:
             continue
         if (path in templates and original is not None and not replace_existing
-                and not is_legacy_role(original, templates[path])):
+                and content != templates[path]):
             conflicts.append(str(path))
         mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o600
         changes.append((path, original, data, mode))
-    report = {'apply': apply, 'changed_files': [str(p) for p, _, _, _ in changes],
+    report = {'apply': apply, 'profile': profile, 'changed_files': [str(p) for p, _, _, _ in changes],
               'conflicting_roles': conflicts, 'model': model, 'thoughtLevel': thought_level,
               'reset_builtin_models': reset_builtin_models,
               'builtins': 'Reset Explore and general-purpose to inherit' if reset_builtin_models
@@ -176,6 +183,8 @@ def configure(home, model=None, *, thought_level=None, apply=False,
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--zcode-home', type=Path, default=Path.home() / '.zcode')
+    parser.add_argument('--profile', choices=('classic', 'turbo'), default='turbo',
+                        help='Select the packaged workflow profile (default: turbo)')
     parser.add_argument('--model', help='Optional provider-id/model-id override for the ten custom roles')
     parser.add_argument('--thought-level', help='Optional thought-level override; requires --model')
     parser.add_argument('--apply', action='store_true')
@@ -186,7 +195,7 @@ def main():
     try:
         report = configure(args.zcode_home, args.model, thought_level=args.thought_level,
                            apply=args.apply, replace_existing=args.replace_existing,
-                           reset_builtin_models=args.reset_builtin_models)
+                           reset_builtin_models=args.reset_builtin_models, profile=args.profile)
     except (ValueError, OSError, RuntimeError) as exc:
         parser.exit(1, str(exc) + '\n')
     print(json.dumps(report, indent=2, ensure_ascii=False))

@@ -1,5 +1,7 @@
 # ZCode 角色编排 / ZCode orchestration
 
+[下载 Turbo 2.0 安装包和同事指南](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0) · [同事安装和使用指南](ZCode-Turbo-2.0-同事安装指南.md)
+
 主 Agent 规划、派发并整合结果，按需选择十个自定义角色和两个内置角色。角色不指定统一模型；已有的角色模型选择保留，没有单独设置时按 ZCode 的会话配置执行。每个任务限定目标、文件归属和相关上下文。
 
 | 配置 | 适用方式 |

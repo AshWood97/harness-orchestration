@@ -111,7 +111,7 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### ZCode 角色编排
 
-[ZCode 角色包](zcode/README.md)独立于 Codex ZCode 桌面接入，提供十个自定义角色和 Explore、general-purpose 两个内置角色。默认的 Turbo 2.0 提供分层分流与可裁剪的四波协作模板，可切换到 Classic 关闭 Turbo。主 Agent 按实际依赖派发最多四个并发子角色，并锁定接口和文件归属；不为凑波次增加未授权的测试或审查。
+[ZCode 角色包](zcode/README.md)（[下载 Turbo 2.0](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0)）独立于 Codex ZCode 桌面接入，提供十个自定义角色和 Explore、general-purpose 两个内置角色。默认的 Turbo 2.0 提供分层分流与可裁剪的四波协作模板，可切换到 Classic 关闭 Turbo。主 Agent 按实际依赖派发最多四个并发子角色，并锁定接口和文件归属；不为凑波次增加未授权的测试或审查。
 
 安装器先预览并保留主规则受管区块外的个人内容，默认保留角色已有模型设置。Turbo 角色关闭 `injectAgentsMd`，主 Agent 必须在派单中传递适用项目与用户约束。配置和切换步骤见 [ZCode 安装说明](zcode/README.md)。
 
@@ -199,7 +199,7 @@ The old persistent CLI runner, hash evidence machinery and automatic final gate 
 
 ### ZCode role orchestration
 
-The [ZCode role package](zcode/README.md) is independent of the Codex ZCode desktop integration. It supplies ten custom roles plus Explore and general-purpose. Turbo 2.0 is the default, with tiered routing and an adaptable four-wave workflow; select Classic to turn Turbo off. The host dispatches up to four ready subagents, settles interfaces and owned paths, and avoids unrequested tests or reviews.
+The [ZCode role package](zcode/README.md) ([download Turbo 2.0](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0)) is independent of the Codex ZCode desktop integration. It supplies ten custom roles plus Explore and general-purpose. Turbo 2.0 is the default, with tiered routing and an adaptable four-wave workflow; select Classic to turn Turbo off. The host dispatches up to four ready subagents, settles interfaces and owned paths, and avoids unrequested tests or reviews.
 
 The installer previews changes, preserves personal guidance outside its managed block and keeps existing role model choices by default. Turbo roles disable `injectAgentsMd`, so the host must include applicable project and user constraints in each assignment. See the [ZCode installation guide](zcode/README.md).
 

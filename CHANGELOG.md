@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — ZCode Turbo 2.0
+## ZCode Turbo 2.0 — 2026-10-31
 
 - Make Turbo the default profile with tiered routing and an adaptable four-wave workflow; allow switching back to Classic and choose only work needed for each task.
 - Dispatch independent ready work within runtime capacity, settle interfaces and owned paths before parallel writes, and avoid default extra tests or reviews.

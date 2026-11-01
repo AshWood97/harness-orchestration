@@ -4,13 +4,13 @@
 
 ## 中文
 
-**使用插件宿主 `orchestrator`，在一个会话中按需调用 14 个独立专业角色。** 插件 v1.1.2 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色。保留当前会话模型/provider，不复制 Codex 模型配置。
+**使用插件宿主 `orchestrator`，在一个会话中按需调用 14 个独立专业角色。** 当前源码 v1.1.3 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色。保留当前会话模型/provider，不复制 Codex 模型配置。
 
-[下载 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)
+[下载已发布的 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [v1.1.2 同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md) · [从当前源码打包](#打包)
 
 ### 安装与新会话调用
 
-1. 从 [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) 下载并导入插件 ZIP；ZIP 根目录直接包含 `.qoder-plugin/plugin.json`。
+1. 按[打包](#打包)从当前 v1.1.3 源码创建 ZIP，或从 [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) 下载旧版；在 Qoder CN 中导入 ZIP，其根目录直接包含 `.qoder-plugin/plugin.json`。
 2. 新建会话，在顶部 Agent 选择器选择 **orchestrator**，描述为“主协调器（插件宿主）”。不要选择用户级 **Harness Orchestration** 来直接派发插件角色。
 3. 首条消息先自检，确认实际工具暴露插件角色，再开始任务：
 
@@ -52,6 +52,8 @@ agent-definition:["plugin","harness-orchestration@local","orchestrator"]
 
 真实任务只选择必要角色，通常 conductor、explorer、worker、reviewer 即可。独立就绪任务可并行，同角色可有多个独立实例，槽位空出后及时补充；共享写入和未确定接口按顺序执行。子角色不继续委派，每个检查问题一个负责人。检查只读，仅为具体未决行为安排最小必要测试。
 
+v1.1.3 的任务书包含相关用户原始要求或准确摘录；摘要不得增加要求，关键原文缺失时须报告。运行中的修正交给原负责人；无法送达时如实说明并核对原任务状态。交付时区分完成、等待必要结果与受阻。[DeepSeek 研究原型](https://github.com/deepseek-ai/dsh-superagent-prototype)仅作按需设计参考，不是运行依赖。
+
 ### 中断、继续与写入恢复
 
 v1.1.2 将恢复规则写入插件：手动中断后等待用户明确要求继续；即使只发送“继续”，也复用有效计划、已完成结果、任务状态和文件归属，不重复派发已完成或仍在运行的任务。只补派依赖已满足的未完成任务，按实际空闲槽位推进。切换模型不代表权限变化，也不直接沿用旧模型对失败原因的判断。
@@ -78,7 +80,7 @@ Agent Team 是固定负责人和成员组合，当前配置界面支持一名负
 
 ```sh
 cd qoder/harness-orchestration
-zip -r /tmp/harness-orchestration-qoder-1.1.2.zip .qoder-plugin agents skills hooks LICENSE
+zip -r /tmp/harness-orchestration-qoder-1.1.3.zip .qoder-plugin agents skills hooks LICENSE
 ```
 
 不要在 ZIP 外包一层目录。hook 使用 `cat` 读取静态规则；Windows 尚未验证。
@@ -109,7 +111,7 @@ zip -r /tmp/harness-orchestration-qoder-1.1.2.zip .qoder-plugin agents skills ho
 
 ### Start with the plugin host
 
-Version **1.1.2** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Download the package from the [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2), import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) includes installation, verification prompts and troubleshooting.
+Current source version **1.1.3** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Build the ZIP using the packaging command above, or download the older [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2). Import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The v1.1.2 [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) includes installation, verification prompts and troubleshooting.
 
 Before assigning work, ask the host to list the agent types actually exposed by its tools. Confirm all 14 `harness-orchestration:<role>` identifiers. Use full namespaced identifiers, not bare names such as `conductor`. Missing types must be reported, never simulated or silently replaced with built-ins.
 
@@ -122,6 +124,8 @@ In the user's Qoder CN environment, the user-level session had empty setting sou
 On **2026-10-30**, the user reported **18 real Agent calls and 18 child transcripts with v1.1.1**, in batches of **4/4/4/4/2**, with all tool statuses `ok` and final replies checked: **18 passed, zero failed**. This documentation update did not rerun the experiment or publish private session data. Eighteen available types is environment-specific; 10+ cumulative calls does not mean 10+ concurrent agents.
 
 Keep at most four delegated tasks running across team and plugin calls, subject to lower runtime limits. Choose only necessary roles, allow independent instances, refill available slots, serialize shared writes, and prohibit child delegation. Use one owner per checking question and minimal targeted verification.
+
+Version 1.1.3 task packets include relevant original user requirements or accurate excerpts; summaries must not add requirements, and missing essential context must be reported. Route follow-ups to the existing owner when delivery is supported; otherwise report the limitation and reconcile the assignment's actual state. Distinguish completed work, waiting for necessary results and blocked work. The [DeepSeek research prototype](https://github.com/deepseek-ai/dsh-superagent-prototype) is an as-needed design reference, not a runtime dependency.
 
 ### Resume and recovery
 

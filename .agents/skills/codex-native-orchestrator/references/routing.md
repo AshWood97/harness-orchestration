@@ -1,6 +1,6 @@
 # Planner-led role selection and dispatch
 
-After either manual or Ultra activation, conductor assesses multi-role work once; the host dispatches its plan using the same manifest models. Children never delegate. Simple work and root-only stay with the host. User naming of individual roles is not required, but explicit no-tests, no-subagent and read-only instructions remain binding.
+After either manual or Ultra activation, conductor assesses multi-role work once; the host dispatches its plan using the same manifest models. In Plan mode, the host must use conductor to formulate the plan even when the task could otherwise stay with the host, subject to the reuse and dispatch limitations in SKILL.md. Children never delegate. Outside Plan mode, simple work and root-only stay with the host. User naming of individual roles is not required, but explicit no-tests, no-subagent and read-only instructions remain binding.
 
 Minimize unnecessary work, not useful parallelism. Judge scope by the work performed: splitting already requested work among capable agents does not expand scope or require separate approval. A role type is not a single-use slot: several scout, mechanic, explorer or worker instances may address different bounded tasks. Select assignments for the requested result, not to exercise the catalog.
 

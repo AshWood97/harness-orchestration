@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Codex Qoder and Qoder 1.1.3 (2026-11-01)
+
+- Add Codex Qoder: a separate Sol/Astra planner and Codex host coordinate visible tasks through the Qoder CN desktop, preserving the selected Qoder model and permissions and its native history.
+- Update Qoder plugin source to 1.1.3: include original requirements in task packets, route follow-ups to their owner when supported, and report completed, waiting and blocked states accurately.
+- Record the DeepSeek research prototype as an as-needed design reference, not a runtime dependency. The existing published Qoder release remains v1.1.2.
+- In activated Native orchestration, use Astra/xhigh Conductor to plan in Plan mode; retain original requirements, follow-up ownership and accurate completion states, and use short waits for long commands where supported without promising a response time.
+- Update ZCode Classic and Turbo source task packets with original requirements, explicit scope and follow-up ownership. Record one controlled Codex ZCode observation where an immediate queued follow-up canceled a Bash call; do not generalize it to all sessions. The existing published ZCode Turbo release remains v2.0.0.
+
 ## ZCode Turbo 2.0 — 2026-10-31
 
 - Make Turbo the default profile with tiered routing and an adaptable four-wave workflow; allow switching back to Classic and choose only work needed for each task.

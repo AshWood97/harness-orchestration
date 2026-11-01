@@ -21,6 +21,7 @@ Plan dependencies, delegate independent work, and inspect concrete results—wit
 | Qoder / Qoder CN | [Plugin host setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
 | ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; Turbo default and optional Classic profile |
 | Codex → ZCode | [Desktop workflow](.agents/skills/codex-zcode/SKILL.md) | Codex coordinates visible ZCode desktop tasks |
+| Codex → Qoder CN | [Desktop workflow](.agents/skills/codex-qoder/SKILL.md) | Codex coordinates visible Qoder CN tasks |
 
 Choose only the integration you need. This repository supplies skills, role prompts, and configuration—not a standalone agent runtime. Accounts, model access, and platform permissions remain with the host application.
 
@@ -29,18 +30,19 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
                                                ↳ Shared writes stay ordered
 ```
 
-**Qoder v1.1.2:** select the plugin-host **orchestrator** for the complete 14-role catalog. Resume instructions preserve valid plans and results after interruption or a model switch. A user-reported **v1.1.1** run completed 18 real delegations in batches of 4/4/4/4/2; that result does not validate the v1.1.2 recovery scenarios or the earlier user-level Agent Team. [Download the release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Quick start and evidence boundaries](qoder/README.md).
+**Qoder source v1.1.3:** select the plugin-host **orchestrator** for the complete 14-role catalog. Resume instructions preserve valid plans and results after interruption or a model switch. A user-reported **v1.1.1** run completed 18 real delegations in batches of 4/4/4/4/2; that result does not validate later recovery scenarios or the earlier user-level Agent Team. [Download the existing v1.1.2 release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Build current source and quick start](qoder/README.md).
 
 **中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。ZCode 可按需选择 Classic 或 Turbo；各平台保留自己的模型及权限边界。
 
 ## 中文
 
-这个仓库提供两个独立安装、按任务选择的 Codex skill、一套 [ZCode 角色编排包](zcode/README.md)，以及 [Qoder 插件](qoder/README.md)。仓库现名为 [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration)，曾用名为 `codex-three-paths`、`codex-zcode-orchestration`。
+这个仓库提供三个独立安装、按任务选择的 Codex skill、一套 [ZCode 角色编排包](zcode/README.md)，以及 [Qoder 插件](qoder/README.md)。仓库现名为 [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration)，曾用名为 `codex-three-paths`、`codex-zcode-orchestration`。
 
 | Skill | 用途 |
 | --- | --- |
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | 由规划者按需选择原生 Codex 角色，完成实现与检查。 |
 | [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | 由独立代理规划，通过 ZCode 桌面并行执行任务，并由 Codex 验收。 |
+| [Codex Qoder](.agents/skills/codex-qoder/SKILL.md) | 由独立代理规划，通过 Qoder CN 桌面创建或续接可见任务，并由 Codex 验收。 |
 
 **v1.0.0** 更新 Native 的 14 个角色：Astra 负责规划和复杂判断，Terra 负责四类高频执行任务，并强化独立任务并发与窄范围提示词。手动技能与 Ultra 使用同一套编排。旧发布编号统一为 v0.x；v0.5.0 引入了专用的 Codex ZCode 接入。
 
@@ -52,6 +54,7 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
 仓库：AshWood97/harness-orchestration
 路径：.agents/skills/codex-native-orchestrator
       .agents/skills/codex-zcode
+      .agents/skills/codex-qoder
 ```
 
 skill 安装到 `${CODEX_HOME:-~/.codex}/skills/`。已有同名安装时先检查个人改动。Codex ZCode 使用本机 ZCode 桌面应用和当前运行时的原生电脑控制工具；执行任务不需要安装或注册旧 bridge/MCP。旧 bridge 文件及配置不会由此技能自动卸载或更改。
@@ -66,6 +69,12 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 通过 ZCode 桌面创建可见任务并保留原生历史；未指定执行模型时保留界面当前选择，指定时在界面选择。派单、跟踪、权限处理和续接都使用桌面界面，不使用旧 MCP、bridge 脚本或 app-server。普通稳定任务默认每 5 分钟巡检，符合条件时退至 10 分钟；关键依赖为 3 分钟，交互或收尾仅短时加频。Luna 合并汇报，主控减少无新交付时的重复检查；巡检周期不等于模型调用周期。操作与控制权交接详见 [skill](.agents/skills/codex-zcode/SKILL.md) 和[桌面操作参考](.agents/skills/codex-zcode/references/operations.md)。
 
+在一次可控的只读长命令测试中，对排队补充点击“立即”后，ZCode 报告 Bash 调用被取消；此观察不代表所有命令或会话都会如此，续接前仍须核对实际状态。详见[操作参考](.agents/skills/codex-zcode/references/operations.md#具体副作用与续接)。
+
+### Codex Qoder 使用
+
+从技能菜单选择 **Codex Qoder**、用 `$codex-qoder` 加任务，或明确要求 Codex 使用 Qoder 执行。独立规划代理默认使用 Sol `max`，复杂或高风险任务使用 Astra `xhigh`；主 Codex 核对授权、协调与验收。技能通过 Qoder CN 桌面创建或续接可见任务，保留原生历史；未指定时沿用界面的模型、档位和权限。讨论或修改技能本身不会启动 Qoder 任务。具体操作和限制见 [skill](.agents/skills/codex-qoder/SKILL.md)。
+
 ### Native 角色与流程
 
 默认流程是 **充分考虑的计划 → 最小实现 → 针对具体问题检查一次 → 有问题修改、没问题放行**。简单任务留在主会话；复杂任务分派确实需要完成的部分。每个检查问题由一个负责人处理，主会话汇总；修复后只看修复和直接影响。用户只要求 Review 时保持只读。
@@ -77,13 +86,15 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 | reviewer、finding_validator、test_author | `gpt-6.1-sol` | `max` |
 | scout、mechanic、check_runner | `gpt-6-luna` | `max` |
 
-保留 14 种角色，不增加永久角色。多角色任务先由 **Conductor 评估依赖并选择实际需要的角色**，主会话负责派遣；同一角色可以有多个不同范围的实例。简单任务、root-only 和禁止子代理的任务留在主会话。专项角色按具体问题选择，不要求用户逐个点名，也不运行整个角色目录。
+保留 14 种角色，不增加永久角色。多角色任务先由 **Conductor 评估依赖并选择实际需要的角色**，主会话负责派遣；同一角色可以有多个不同范围的实例。简单任务、root-only 和禁止子代理的任务留在主会话，但已启动编排且处于计划模式时，按下方规划规则处理。专项角色按具体问题选择，不要求用户逐个点名，也不运行整个角色目录。
 
 优先选择能胜任任务的最小模型角色：定点查找交给 Luna max 的 scout，按明确方案修改交给 mechanic，必要且命令已确定的检查交给 check_runner；需要其他能力时使用相应固定角色，不擅自改变角色模型。已有任务内创建、复用或增加子代理是执行方式，不是扩大范围，无需仅因代理数量再次确认。Native 子代理不再委派的规则只约束这些子代理，不限制主会话并行派发，也不禁止 ZCode 使用已配置的内部子代理。
 
 最多同时运行 **4 个子代理，不含主会话**，并受实际运行时容量限制。输入齐备、依赖已完成且无写入冲突的任务可以并行；有四项必要任务就同时派发四项，空位出现后接续就绪任务。独立模块的探索、资料研究及接口已确定的独立文件实现都可并发；共享写入和依赖保持有序。不为凑满并发制造任务，四个并发也不等于整个任务只能创建四个实例。
 
 每个角色提示词明确职责、输入、工作方法、结果格式、停止条件和执行边界；任务书再给出一个目标、窄方向、相关上下文和文件范围。减少无关历史，并在上下文仍适合时复用子代理。重要改动可从不同的具体功能角度独立检查，先看原始需求和代码，再参考其他结论；不投票、不重复全量 review、不设置自动最终 Guardian。
+
+任务书保留相关用户原始要求或准确摘录；后续修正交给原负责人，状态区分已完成、等待必要结果与受阻。需要处理中途消息的长命令在运行时允许时使用短等待并保留原会话，不保证固定响应时限。
 
 尽量少做额外测试：先读源码和结果、复用已有观察；重要行为无法据此判断时才安排最小针对性检查，优先现有用例，确有具体缺口才补测试。限制的是以“更稳妥”为由新增无用工作、重复检查、不必要的测试或全量审查，以及主动安全审查、防御性包装、兼容层、未来抽象和额外校验层；鼓励完成既定任务所需的有效并行。用户明确的不测试、只读等限制优先遵守。
 
@@ -96,6 +107,8 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 从技能菜单选择 **Codex Native Orchestration** 或直接用 `$codex-native-orchestrator` 加任务，手动启用。普通/Max 不按任务内容自动启用。
 
 Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。**两种入口加载同一份 14 角色清单、固定模型和四子代理并发规则**：Astra/xhigh Conductor 评估，主会话派遣所需角色，包括上述四个 Terra/max 角色。没有固定的 Tester → Reviewer → Guardian 流水线。
+
+编排已经启动且受信运行时处于计划模式时，由 `gpt-6-astra` / `xhigh` 的 Conductor 制定计划，即使任务本可由主会话处理；已有可用计划仍可复用。禁止子代理或该角色无法调用时如实说明，不假称已使用所需模型。计划模式不授权实施。
 
 实际选择 **Codex ZCode**、用 `$codex-zcode` 加任务或直接要求使用 ZCode 时，该选择优先于 Ultra 的自动 Native 路由；只是讨论、引用或检查 ZCode 不算启用。
 
@@ -115,9 +128,11 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 安装器先预览并保留主规则受管区块外的个人内容，默认保留角色已有模型设置。Turbo 角色关闭 `injectAgentsMd`，主 Agent 必须在派单中传递适用项目与用户约束。配置和切换步骤见 [ZCode 安装说明](zcode/README.md)。
 
+当前源码的 Classic 与 Turbo 任务书规则均要求保留原始要求、用户明确的范围和续接归属，并如实区分完成、等待与受阻；上述 Turbo 2.0 下载链接仍指向已有发布版本，不包含未发布的源码更新。
+
 ### Qoder 角色编排
 
-[Qoder v1.1.2](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。[下载 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](qoder/Harness-Orchestration-1.1.2-同事复用指南.md)
+[Qoder 源码 v1.1.3](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。当前源码可按指南打包安装；已发布的 [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) 和[同事复用指南](qoder/Harness-Orchestration-1.1.2-同事复用指南.md)仍对应 1.1.2。
 
 用户报告 **v1.1.1** 的同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发。v1.1.2 在中断或换模型后按用户要求复用有效计划与结果，仅恢复未完成任务；重派写入前核对实际文件，明确权限拒绝、用户取消或运行时不可用时停止或询问。指南提供恢复测试步骤，但本次未重新运行验证。保持当前模型/provider，共享写入串行、子角色不再委派。修改插件后升版本并重装，再验证新会话；只切开关可能复用旧 roster。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
 
@@ -129,12 +144,13 @@ CI 只对 Codex ZCode 与 `zcode/` 路径的改动运行相关测试，使用 ma
 
 ## English
 
-This repository provides two Codex skills installed and selected independently, a [ZCode role package](zcode/README.md), and a [Qoder plugin](qoder/README.md). The repository is [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration), previously `codex-three-paths` and `codex-zcode-orchestration`.
+This repository provides three Codex skills installed and selected independently, a [ZCode role package](zcode/README.md), and a [Qoder plugin](qoder/README.md). The repository is [AshWood97/harness-orchestration](https://github.com/AshWood97/harness-orchestration), previously `codex-three-paths` and `codex-zcode-orchestration`.
 
 | Skill | Purpose |
 | --- | --- |
 | [Codex Native Orchestration](.agents/skills/codex-native-orchestrator/SKILL.md) | Let the planner select native Codex roles for scoped implementation and inspection. |
 | [Codex ZCode](.agents/skills/codex-zcode/SKILL.md) | Plan with a separate agent, run tasks in parallel through the ZCode desktop, and have Codex inspect the results. |
+| [Codex Qoder](.agents/skills/codex-qoder/SKILL.md) | Plan with a separate agent, create or continue visible Qoder CN tasks, and have Codex inspect the results. |
 
 **v1.0.0** updates Native's 14 roles: Astra handles planning and difficult judgments, Terra handles four frequent execution roles, and focused prompts support concurrent independent assignments. Manual and Ultra entrypoints share the same orchestration. Historical releases use v0.x numbering; v0.5.0 introduced the dedicated Codex ZCode integration.
 
@@ -146,6 +162,7 @@ Ask the built-in `$skill-installer` in Codex to install the paths you need from 
 Repository: AshWood97/harness-orchestration
 Paths: .agents/skills/codex-native-orchestrator
        .agents/skills/codex-zcode
+       .agents/skills/codex-qoder
 ```
 
 Skills install into `${CODEX_HOME:-~/.codex}/skills/`. Inspect an existing installation before replacing personal changes. Codex ZCode uses the local ZCode desktop app and the current runtime's native computer-control tools; executing tasks does not require installing or registering the old bridge/MCP. The skill does not automatically uninstall or change existing bridge files or configuration.
@@ -160,6 +177,12 @@ A separate planning agent defines tasks and dependencies: Sol `max` by default, 
 
 Create visible tasks in the ZCode desktop and preserve their native history. Keep the current execution model shown in the interface unless the user specifies another, in which case select it there. Dispatch, tracking, permissions and continuations use the desktop interface rather than the old MCP, bridge scripts or app-server. Stable tasks are checked every 5 minutes, backing off to 10 when eligible; critical dependencies use 3 minutes, with brief faster checks for interactions or completion signals. Luna batches reports and the host avoids redundant checks without new deliverables. UI polling intervals do not imply identical model-call intervals. See the [skill](.agents/skills/codex-zcode/SKILL.md) and [desktop operations reference](.agents/skills/codex-zcode/references/operations.md) for the workflow and control handoff.
 
+In one controlled read-only long-command test, clicking “立即” on a queued follow-up caused ZCode to report the Bash call canceled. This single observation does not establish behavior for all commands or sessions; reconcile actual state before continuing. See the [operations reference](.agents/skills/codex-zcode/references/operations.md#具体副作用与续接).
+
+### Use Codex Qoder
+
+Select **Codex Qoder** in the skill menu, invoke `$codex-qoder` with a task, or explicitly ask Codex to use Qoder. A separate planning agent uses Sol `max` by default or Astra `xhigh` for complex or high-risk work; the host Codex checks authorization, coordinates and accepts results. The skill creates or continues visible tasks through the Qoder CN desktop and preserves native history. Unless specified, it keeps the model, effort and permissions shown in the interface. Discussing or editing the skill does not start a Qoder task. See the [skill](.agents/skills/codex-qoder/SKILL.md) for the workflow and limits.
+
 ### Native roles and workflow
 
 Use **plan → implement → inspect each concrete question once → fix concrete issues or deliver**. Understand the requirements and relevant source before editing. Keep simple work in the host and delegate necessary parts of the request. Assign one owner per checking question; the host consolidates the results. After a repair, inspect that repair and its effects; reuse unchanged conclusions. Review-only requests never authorize edits.
@@ -171,13 +194,15 @@ Use **plan → implement → inspect each concrete question once → fix concret
 | reviewer, finding_validator, test_author | `gpt-6.1-sol` | `max` |
 | scout, mechanic, check_runner | `gpt-6-luna` | `max` |
 
-Keep 14 role types without adding permanent roles. For multi-role work, **Conductor assesses dependencies and selects the roles needed**, and the host dispatches them. A role may have several instances with different scopes. Simple work, root-only and no-subagent requests remain in the host. Specialists answer concrete questions; the user need not name each role. Do not run the entire catalog.
+Keep 14 role types without adding permanent roles. For multi-role work, **Conductor assesses dependencies and selects the roles needed**, and the host dispatches them. A role may have several instances with different scopes. Simple work, root-only and no-subagent requests remain in the host, subject to the activated Plan mode rule below. Specialists answer concrete questions; the user need not name each role. Do not run the entire catalog.
 
 Prefer the smallest capable catalog role: Luna max scout for exact retrieval, mechanic for prescribed edits, and check_runner for necessary exact command lists. Use the other fixed roles when their capabilities are needed; do not silently change role models. Creating or reusing agents for already requested work is an execution choice, not scope expansion, and needs no separate approval merely because of agent count. The no-delegation rule for Native children applies only to those children; it does not prohibit host parallelism or ZCode's configured internal agents.
 
 Run at most **four subagents concurrently, excluding the host**, within actual runtime capacity. An assignment is ready when inputs are available, dependencies are satisfied and writes do not conflict. Dispatch all four when four useful assignments are ready, and refill freed slots. Independent exploration, research and edits to separately owned files with settled interfaces can run concurrently; order shared writes and dependencies. Do not invent filler tasks. Four is a concurrency limit, not a limit on total instances over the task.
 
 Each role prompt specifies responsibility, inputs, method, result, stopping conditions and execution boundaries. Each assignment adds one objective, a narrow direction, relevant context and owned paths. Avoid unrelated history; reuse a child when its context still fits. Important changes may receive independent checks of distinct concrete functional questions, using original requirements and source before other conclusions. No voting, duplicate full reviews or automatic final Guardian.
+
+Task packets preserve relevant original requirements or accurate excerpts. Route follow-ups to their existing owner and distinguish completed, waiting and blocked work. When a long command may receive follow-ups, use short waits and retain the same session where supported; no response deadline is guaranteed.
 
 Minimize extra testing: inspect source/results and reuse observations first. Choose the smallest targeted check only for important unresolved behavior, preferring existing cases and adding tests only for a concrete gap. Limit unnecessary work, duplicate checking, unnecessary tests or full reviews, unsolicited security audits, defensive wrappers, compatibility layers, future abstractions and extra verification layers added for reassurance; encourage useful parallel execution of the requested work. Explicit no-tests and read-only instructions take precedence.
 
@@ -191,6 +216,8 @@ Keep `allow_implicit_invocation: false`. Select **Codex Native Orchestration** i
 
 The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. **Both entrypoints load the same 14-role manifest, fixed models and four-subagent concurrency rules**: Astra/xhigh Conductor assesses multi-role work, and the host dispatches the selected roles, including the four Terra/max roles above. Preserve the user's host model and effort. No fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
 
+When orchestration is active and the trusted runtime is in Plan mode, Conductor (`gpt-6-astra` / `xhigh`) formulates the plan even if the host could otherwise handle the task alone; reuse an existing suitable plan. If subagents are prohibited or that role cannot be dispatched, report the limitation rather than claiming the model was used. Plan mode does not authorize implementation.
+
 Selecting **Codex ZCode**, invoking `$codex-zcode` with a task, or directly asking to use ZCode takes priority over automatic Native routing in Ultra. Discussion, quotations and requests to inspect ZCode do not activate that override.
 
 Run `python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/install_activation.py --apply` to merge the marked personal AGENTS.md entrypoint, preserving other guidance. Omit `--apply` for a read-only check. It creates no digest, backup receipt or log.
@@ -203,9 +230,11 @@ The [ZCode role package](zcode/README.md) ([download Turbo 2.0](https://github.c
 
 The installer previews changes, preserves personal guidance outside its managed block and keeps existing role model choices by default. Turbo roles disable `injectAgentsMd`, so the host must include applicable project and user constraints in each assignment. See the [ZCode installation guide](zcode/README.md).
 
+Current Classic and Turbo source rules preserve original requirements, explicit scope and follow-up ownership, and distinguish completed, waiting and blocked work. The Turbo 2.0 download above remains the existing release and does not include these unreleased source changes.
+
 ### Qoder role orchestration
 
-The [v1.1.2 plugin](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host. [Download the release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Colleague guide](qoder/Harness-Orchestration-1.1.2-同事复用指南.md).
+The [v1.1.3 plugin source](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host. Build the current source as described in the guide; the existing [v1.1.2 release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) and [colleague guide](qoder/Harness-Orchestration-1.1.2-同事复用指南.md) apply to v1.1.2.
 
 The user reported 18 successful real delegations with **v1.1.1** in one host session, batched with at most four concurrent tasks. In v1.1.2, resumption after interruption or a model switch reuses valid plans and results, dispatches only unfinished work, and checks actual file changes before redispatching writes. Explicit permission denial, user cancellation or runtime unavailability requires stopping or asking. The guide provides recovery test steps; those scenarios were not rerun for this update. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
 

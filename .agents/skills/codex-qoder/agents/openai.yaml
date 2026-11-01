@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex Qoder"
+  short_description: "Codex 通过电脑操作 Qoder 桌面新建并执行任务，保留原生历史"
+  default_prompt: "使用 $codex-qoder 通过电脑控制 Qoder CN 桌面，在目标工作区创建或续接可见任务，由 Codex 跟进并验收结果。"
+policy:
+  allow_implicit_invocation: true

@@ -1,8 +1,12 @@
 # Planner-led role selection and dispatch
 
-After either manual or Ultra activation, conductor assesses multi-role work once; the host dispatches its plan using the same manifest models. Children never delegate. Simple work and root-only stay with the host. User naming of individual roles is not required, but explicit no-tests, no-subagent and read-only instructions remain binding.
+After either manual or Ultra activation, conductor assesses multi-role work once; the host dispatches its plan using the same manifest models. In Plan mode, the host must use conductor to formulate the plan even when the task could otherwise stay with the host, subject to the reuse and dispatch limitations in SKILL.md. Children never delegate. Outside Plan mode, simple work and root-only stay with the host. User naming of individual roles is not required, but explicit no-tests, no-subagent and read-only instructions remain binding.
 
 Minimize unnecessary work, not useful parallelism. Judge scope by the work performed: splitting already requested work among capable agents does not expand scope or require separate approval. A role type is not a single-use slot: several scout, mechanic, explorer or worker instances may address different bounded tasks. Select assignments for the requested result, not to exercise the catalog.
+
+Before choosing roles, group steps that share substantial context, require continuous judgment or frequent back-and-forth under one owner, whether the host or a child. Do not split a continuous work unit merely by phase or role name. Independent work with clear inputs, outputs and ownership remains eligible for parallel dispatch. If repeated exchanges reveal a poor boundary, the host adjusts it while retaining the user's goal, constraints and responsibility for integration.
+
+This routing judgment draws on [Anthropic's discussion of folding subagents into the main loop](https://claude.com/resources/articles/building-agents-when-to-fold-subagents-into-your-main-agent-loop). Its examples concern Claude Platform and do not establish Codex performance gains.
 
 ## Use available capacity
 

@@ -1,6 +1,8 @@
-# 运行时来源与维护
+# 历史 Bridge 运行时来源与维护
 
-本技能使用 [Sandyzzx/codex-zcode-bridge](https://github.com/Sandyzzx/codex-zcode-bridge) 1.2.7 的公开共享核心，具体提交及补丁记录在 runtime/UPSTREAM.json。Windows 环境白名单增加 PSModuleAnalysisCachePath，避免 PowerShell 命令发现丢失现有缓存而超时；其余核心源代码未改动。src/ 下是本项目的宿主适配层。分发时保留核心 Apache-2.0 LICENSE、NOTICE 及依赖许可证。
+以下保留旧 Bridge 的来源与维护记录。当前 `codex-zcode` 已改为通过电脑控制 ZCode 桌面应用；本页、`scripts/`、`src/`、`runtime/` 与旧 Bridge 测试均不属于当前技能的执行入口，不自动安装、调用或回退。保留这些文件不表示授权操作现有 Bridge 任务；当前操作流程见 [operations.md](operations.md)。
+
+旧 Bridge 使用 [Sandyzzx/codex-zcode-bridge](https://github.com/Sandyzzx/codex-zcode-bridge) 1.2.7 的公开共享核心，具体提交及补丁记录在 runtime/UPSTREAM.json。Windows 环境白名单增加 PSModuleAnalysisCachePath，避免 PowerShell 命令发现丢失现有缓存而超时；其余核心源代码未改动。src/ 下是旧方案的宿主适配层。分发时保留核心 Apache-2.0 LICENSE、NOTICE 及依赖许可证。
 
 适配层为独立 CODEX_HOME 配置提供 MCP/worker 入口，清除继承环境里的旧桥接配置，只接受当前安装配置。配置内出现持久模型覆盖或启用浏览器时明确拒绝；持久默认模型写入接口也拒绝操作。每个 worker 再执行相同检查，沿用上游任务、会话、事件和取消机制。
 
@@ -17,4 +19,4 @@ node scripts/build_zcode_runtime.mjs /absolute/path/to/codex-zcode-bridge
 
 构建脚本只读取匹配的上游提交，并把共享核心、SDK 和依赖打入两个 Node ESM 入口；Node >=22.18。不打入账号配置、个人路径、任务记录或浏览器后端。
 
-比较参考：[coder-mcp-bridge](https://github.com/Deslord319/coder-mcp-bridge) 的任务控制与资源互斥、[zcode-open-bridge](https://github.com/tizerluo/zcode-open-bridge) 的 MCP/协议兼容、[zcode-acp](https://github.com/william0wang/zcode-acp) 的无界面 app-server 接入。此技能仅维护 Codex 到本机 ZCode 的执行通道。
+旧方案比较参考：[coder-mcp-bridge](https://github.com/Deslord319/coder-mcp-bridge) 的任务控制与资源互斥、[zcode-open-bridge](https://github.com/tizerluo/zcode-open-bridge) 的 MCP/协议兼容、[zcode-acp](https://github.com/william0wang/zcode-acp) 的无界面 app-server 接入。

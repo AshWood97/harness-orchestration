@@ -19,6 +19,8 @@ injectAgentsMd: true
 检查所述触发条件能否到达声称的行为，以及实际影响是否违反需求。依据源码和现有结果判断，区分‘不成立’与‘尚无法确定’，不投票、不重做全量 Review。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 成立、不成立或尚无法确定，并给出精确依据和缺失事实。
 
 ## 停止条件

@@ -4,26 +4,24 @@
 
 ## 中文
 
-**使用插件宿主 `orchestrator`，在一个会话中按需调用 14 个独立专业角色。** 插件 v1.1.2 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色。保留当前会话模型/provider，不复制 Codex 模型配置。
+**使用插件宿主 `orchestrator`，在一个会话中按需调用实际可用的专业角色。** 当前源码插件 v1.1.4 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色；定义存在不等于当前会话可派发。保留当前会话模型/provider，不复制 Codex 模型配置。
 
-[下载 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)
+[历史 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [历史同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)。v1.1.4 使用下方源码打包步骤；本次改动不声称已发布新版 Release 或通过真实宿主验证。
 
 ### 安装与新会话调用
 
-1. 从 [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) 下载并导入插件 ZIP；ZIP 根目录直接包含 `.qoder-plugin/plugin.json`。
+1. 使用下方步骤从当前源码打包并导入 v1.1.4 插件 ZIP；ZIP 根目录直接包含 `.qoder-plugin/plugin.json`。
 2. 新建会话，在顶部 Agent 选择器选择 **orchestrator**，描述为“主协调器（插件宿主）”。不要选择用户级 **Harness Orchestration** 来直接派发插件角色。
-3. 首条消息先自检，确认实际工具暴露插件角色，再开始任务：
+3. 需要分工时，先自检实际工具暴露的插件角色，再派发所需角色：
 
 ```text
-先列出你实际可用的 agent 类型，确认包含 harness-orchestration:conductor、
-harness-orchestration:explorer、harness-orchestration:worker、
-harness-orchestration:reviewer 等 14 个插件角色。
-未确认前不要开始任务；缺失时报告具体限制，不模拟角色回答。
+先列出你实际可用的 agent 类型，确认本任务所需的插件角色及完整标识。
+未确认前不要派发角色；所需角色缺失时报告具体限制，不模拟角色回答。
 全程最多 4 个并发，共享写入串行，子角色不得继续委派。
 任务：<你的任务>
 ```
 
-也可以先只发送自检，看到实际角色清单后再提交任务。不要将提示词中的角色名字当作可用性证据。
+也可以先只发送自检，看到实际角色清单后再提交任务。不要将提示词中的角色名字或安装成功当作可用性证据；简单任务无需先调用子角色。
 
 若选择器未出现宿主，先确认插件已安装并启用，再新建会话检查。此前的本地安装中，用户也曾明确要求另一个具备 `create_chat_session` 工具的 Qoder 会话，使用以下标识创建宿主会话：
 
@@ -52,6 +50,8 @@ agent-definition:["plugin","harness-orchestration@local","orchestrator"]
 
 真实任务只选择必要角色，通常 conductor、explorer、worker、reviewer 即可。独立就绪任务可并行，同角色可有多个独立实例，槽位空出后及时补充；共享写入和未确定接口按顺序执行。子角色不继续委派，每个检查问题一个负责人。检查只读，仅为具体未决行为安排最小必要测试。
 
+v1.1.4 的指令要求复用有效计划、由主控完成简单任务，并使每个路径或共享资源同一时间只有一个写入负责人；独立资源可并行。跨应用任务按外层分配的任务身份、约束和预算交接，执行完成与验收分开。并发与资源额度是协作约定，不代表本版本已证明宿主能硬性限制它们；未确认旧执行者停止前不重派相同写入范围。
+
 ### 中断、继续与写入恢复
 
 v1.1.2 将恢复规则写入插件：手动中断后等待用户明确要求继续；即使只发送“继续”，也复用有效计划、已完成结果、任务状态和文件归属，不重复派发已完成或仍在运行的任务。只补派依赖已满足的未完成任务，按实际空闲槽位推进。切换模型不代表权限变化，也不直接沿用旧模型对失败原因的判断。
@@ -78,7 +78,7 @@ Agent Team 是固定负责人和成员组合，当前配置界面支持一名负
 
 ```sh
 cd qoder/harness-orchestration
-zip -r /tmp/harness-orchestration-qoder-1.1.2.zip .qoder-plugin agents skills hooks LICENSE
+zip -r /tmp/harness-orchestration-qoder-1.1.4.zip .qoder-plugin agents skills hooks LICENSE
 ```
 
 不要在 ZIP 外包一层目录。hook 使用 `cat` 读取静态规则；Windows 尚未验证。
@@ -109,9 +109,9 @@ zip -r /tmp/harness-orchestration-qoder-1.1.2.zip .qoder-plugin agents skills ho
 
 ### Start with the plugin host
 
-Version **1.1.2** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Download the package from the [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2), import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) includes installation, verification prompts and troubleshooting.
+Source version **1.1.4** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Package it using the command above, import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) and [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) are historical; no new Release or successful real-host verification is implied.
 
-Before assigning work, ask the host to list the agent types actually exposed by its tools. Confirm all 14 `harness-orchestration:<role>` identifiers. Use full namespaced identifiers, not bare names such as `conductor`. Missing types must be reported, never simulated or silently replaced with built-ins.
+Before assigning work, ask the host to list the agent types actually exposed by its tools. Use the actual full identifiers for the required plugin roles, not invented names such as bare `conductor`. Missing required types must be reported, never simulated or silently replaced with built-ins; simple work stays in the host.
 
 If the UI does not list the host, first confirm the plugin is installed and enabled, then check a new session. In a previous local installation, the user explicitly asked another Qoder session with `create_chat_session` to create a host using `agent-definition:["plugin","harness-orchestration@local","orchestrator"]`. Resolve the actual ID for other installation sources. That reported session inherited its existing model (`dfmodel`) without provider changes. Under v1.1.2, the current host must report an unavailable entry, roster, required role or runtime and stop or ask; it must not automatically switch entry, host or role, or retry. A user separately requesting a new session is a distinct action.
 

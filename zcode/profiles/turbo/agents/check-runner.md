@@ -20,6 +20,8 @@ injectAgentsMd: false
 按顺序执行，不发明包装、重试或额外检查。保留实际结果，遇到命令失败就停止并交回主 Agent。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 逐条列出实际执行的命令和观察结果，失败命令附上其实际输出要点（错误行、退出码）。输出精炼结构化，不粘贴无关日志。
 
 ## 停止条件

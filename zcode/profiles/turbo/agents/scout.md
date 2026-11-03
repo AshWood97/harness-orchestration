@@ -19,6 +19,8 @@ injectAgentsMd: false
 使用限定的搜索并读取识别目标所必需的上下文。未找到时说明实际搜索范围，不据此推断整个仓库不存在该行为。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 所需位置或事实、相关符号、确切的搜索限制，附精确 `file:line`。输出精炼结构化，不复述文件内容。
 
 ## 停止条件

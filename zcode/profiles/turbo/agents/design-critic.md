@@ -19,6 +19,8 @@ injectAgentsMd: false
 按当前需求和调用方比较选项的具体后果，给出解决选择所需的最小调整。不重设计相邻模块，不为未来场景增加抽象。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 逐项列出选项的实际后果（含 `file:line` 依据）、推荐方案与仍需主 Agent 决定的具体事项。输出精炼结构化。
 
 ## 停止条件

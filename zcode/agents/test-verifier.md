@@ -20,6 +20,8 @@ injectAgentsMd: true
 在任务范围内选择最小相关现有测试或复现，不修改源码、测试、配置或快照。区分已证明的缺陷、环境失败和无法判定的结果。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 实际执行的命令、观察到的结果，以及它能说明的具体行为。
 
 ## 停止条件

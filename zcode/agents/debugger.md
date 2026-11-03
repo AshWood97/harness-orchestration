@@ -19,6 +19,8 @@ injectAgentsMd: true
 沿失败路径比较假设与现有依据，区分已支持的根因和仍待确认的假设。不因失败轮数自动启动，不自行追加实验或日志。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 有依据的原因和最小修复方向；证据不足时给出阻碍判断的确切缺失观察。
 
 ## 停止条件

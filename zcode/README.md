@@ -11,7 +11,7 @@
 
 Turbo 的 Tier S/M/L 和四波次是按任务选择、裁剪的工作模板：独立探索、分别归属文件的实现、必要检查和定点修复可随依赖推进；不为凑满并发或波次增加测试、重复审查或其他未授权工作。用户的只读、不测试、禁止委派等限制优先。
 
-最多并发四个子代理，不含主 Agent，并服从实际运行时容量。有四项必要且独立的就绪任务就同时派发，允许同角色多个实例，空位出现后接续任务。独立文件且接口确定的实现可并行；共享写入和未完成依赖保持有序，不为凑满并发制造任务。
+最多并发四个子代理，不含主 Agent，并服从实际运行时容量。有四项必要且独立的就绪任务就同时派发，允许同角色多个实例，运行时支持时空位出现后接续任务；前台批次阻塞或后台补位能力未知时按实际能力安排。独立文件且接口确定的实现可并行；共享写入和未完成依赖保持有序，不为凑满并发制造任务。
 
 | 工作 | 角色与结果 |
 | --- | --- |
@@ -30,7 +30,7 @@ Turbo 的 Tier S/M/L 和四波次是按任务选择、裁剪的工作模板：�
 
 角色目录可选，不是每次必须执行的流水线。无需用户逐个点名角色；必要性判断不能覆盖用户的明确禁止。
 
-Turbo 的十个角色设置 `injectAgentsMd: false`。主 Agent 派单时必须传递适用的用户指令和项目 `AGENTS.md` 约束，以及已确定的接口、允许修改的文件和完成条件；不要假定这些规则会自动注入子角色。
+Turbo 的十个角色设置 `injectAgentsMd: false`。主 Agent 派单时须向所有角色（包括内置 Explore）传递适用的用户指令、项目 `AGENTS.md` 规则来源、允许路径与动作、完成条件和外层预算；不要假定这些规则已自动注入。公共 `status` 描述角色执行，只有裁定发现时才补 `verdict`，不把角色完成当作最终验收。
 
 每个检查问题由一个负责人处理，主 Agent 汇总；交叉检查回答不同的具体功能问题。Review 只读，不设置自动最终审核。先读源码和已有结果，仅对重要且未解决的行为安排最小必要检查。禁止自行增加哈希、安全审查、防御包装、兼容层、未来抽象、重复 Review、额外测试或产物；超范围先询问。
 
@@ -77,9 +77,9 @@ Turbo 配置来自用户提供的 ZCode 移交包；移交包报告曾完成模�
 
 The package supplies ten custom roles plus the built-in Explore and general-purpose roles. **Turbo 2.0** is the default profile; it adds tiered routing and a four-wave collaboration template. Select **Classic** to turn Turbo off. The host selects only work needed for the request: the waves are adaptable examples, not a requirement to add tests, repeated reviews, or other unrequested work. Explicit user restrictions take precedence.
 
-Run at most four subagents concurrently, excluding the host and subject to runtime capacity. Dispatch independent ready work together, allow multiple instances of a role, and refill freed slots. Parallel writers need separately owned files and settled interfaces; shared writes and dependencies stay ordered. Do not create filler tasks. Assign one owner per concrete checking question, keep review read-only and use independent checks only for distinct functional questions.
+Run at most four subagents concurrently, excluding the host and subject to runtime capacity. Dispatch independent ready work together and allow multiple instances of a role; refill freed slots only if the actual runtime supports it, otherwise respect foreground batch semantics. Parallel writers need separately owned files and settled interfaces; shared writes and dependencies stay ordered. Do not create filler tasks. Assign one owner per concrete checking question, keep review read-only and use independent checks only for distinct functional questions.
 
-Turbo roles set `injectAgentsMd: false`. The host must include applicable user instructions and project `AGENTS.md` constraints in each assignment, along with settled interfaces, owned paths and completion conditions; do not assume those rules are automatically injected.
+Turbo roles set `injectAgentsMd: false`. The host must pass applicable user instructions, the source of project `AGENTS.md` constraints, allowed actions, owned paths, completion conditions, and outer budget to every role including built-in Explore; do not assume those rules are automatically injected. Execution `status` is separate from an optional finding `verdict` and from host acceptance.
 
 With Python 3.11+, run `python zcode/scripts/install.py` to preview the default Turbo profile and add `--apply` to install. To turn Turbo off and return to the repository's Classic templates, preview `python zcode/scripts/install.py --profile classic` and then add `--apply`; this does not restore pre-install personal role files. Inspect role conflicts before explicitly adding `--replace-existing`. The default home is `~/.zcode`, or specify `--zcode-home`.
 

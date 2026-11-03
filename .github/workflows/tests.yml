@@ -3,14 +3,26 @@ name: Test skills
 on:
   push:
     paths:
+      - '.agents/skills/codex-native-orchestrator/**'
+      - '.agents/skills/codex-qoder/**'
       - '.agents/skills/codex-zcode/**'
+      - 'qoder/**'
       - 'zcode/**'
+      - 'shared/**'
+      - 'adapters/**'
+      - 'tests/orchestration/**'
       - 'scripts/build_zcode_runtime.mjs'
       - '.github/workflows/tests.yml'
   pull_request:
     paths:
+      - '.agents/skills/codex-native-orchestrator/**'
+      - '.agents/skills/codex-qoder/**'
       - '.agents/skills/codex-zcode/**'
+      - 'qoder/**'
       - 'zcode/**'
+      - 'shared/**'
+      - 'adapters/**'
+      - 'tests/orchestration/**'
       - 'scripts/build_zcode_runtime.mjs'
       - '.github/workflows/tests.yml'
   workflow_dispatch:
@@ -51,10 +63,15 @@ jobs:
         shell: bash
         run: |
           node --test .agents/skills/codex-zcode/tests/*.test.mjs
-      - name: Run Native installer tests only on explicit manual dispatch
-        if: github.event_name == 'workflow_dispatch'
+      - name: Run Native installer tests
         shell: bash
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
           python -B -m unittest discover -s .agents/skills/codex-native-orchestrator/tests -p 'test_*.py' -q
+      - name: Run Qoder configuration tests
+        shell: bash
+        run: python -B -m unittest discover -s qoder/tests -p 'test_*.py' -q
+      - name: Run orchestration state tests
+        shell: bash
+        run: python -B -m unittest discover -s tests/orchestration -p 'test_*.py' -q

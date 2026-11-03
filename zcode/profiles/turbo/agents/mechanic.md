@@ -21,6 +21,8 @@ injectAgentsMd: false
 按步骤操作并保留无关修改。步骤含糊或目标与预期不同就返回具体差异和已完成部分，不自行补充设计或扩大行为。
 
 ## 结果
+返回执行状态 `status`（`completed`、`partial`、`blocked`、`failed` 或 `cancelled`）；状态不表示主 Agent 已验收。仅在任务需要裁定发现时补充 `verdict`。
+
 逐条列出实际完成的指定修改及所在 `file:line`，以及未能执行的具体步骤和位置。输出精炼结构化。
 
 ## 停止条件

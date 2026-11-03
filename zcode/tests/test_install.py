@@ -19,7 +19,6 @@ class InstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp).resolve() / 'new-home'
             result = install.configure(home, reset_builtin_models=True)
-            self.assertEqual(result['profile'], 'turbo')
             self.assertEqual(len(result['changed_files']), 11)
             self.assertFalse(home.exists())
 
@@ -28,17 +27,17 @@ class InstallTests(unittest.TestCase):
             home = Path(tmp).resolve()
             original = b'\xef\xbb\xbfPersonal rule\r\n'
             (home / 'AGENTS.md').write_bytes(original)
-            result = install.configure(home, apply=True)
-            self.assertEqual(result['profile'], 'turbo')
+            install.configure(home, apply=True)
             guidance = (home / 'AGENTS.md').read_bytes()
             self.assertTrue(guidance.startswith(original))
-            self.assertIn((install.PACKAGE / 'profiles/turbo/AGENTS.md').read_bytes().strip(), guidance)
+            self.assertIn((install.PACKAGE / 'AGENTS.md').read_bytes().strip(), guidance)
             self.assertEqual(len(list((home / 'agents').glob('*.md'))), 10)
             for p in (home / 'agents').glob('*.md'):
                 text = p.read_text(encoding='utf-8')
                 self.assertNotIn('\nmodel:', text)
                 self.assertNotIn('\nthoughtLevel:', text)
                 self.assertNotIn('__ZCODE_MODEL_ID__', text)
+                self.assertIn('injectAgentsMd: true', text)
             self.assertEqual(install.configure(home, apply=True)['changed_files'], [])
 
     def test_explicit_model_and_optional_thought_level(self):
@@ -73,7 +72,7 @@ class InstallTests(unittest.TestCase):
             prefix, suffix = b'\xef\xbb\xbfPersonal rule\r\n', b'\r\nPersonal suffix\r\n'
             (home / 'AGENTS.md').write_bytes(prefix + install.START + b'\r\nold\r\n' + install.END + suffix)
             with patch.object(install, 'PACKAGE', package):
-                install.configure(home, MODEL, thought_level='medium', apply=True, profile='classic')
+                install.configure(home, MODEL, thought_level='medium', apply=True)
                 for role in install.ROLES:
                     data = (home / 'agents' / (role + '.md')).read_bytes()
                     self.assertIn(('model: "' + MODEL + '"\n').encode('utf-8'), data)
@@ -82,14 +81,14 @@ class InstallTests(unittest.TestCase):
                 guidance = (home / 'AGENTS.md').read_bytes()
                 self.assertTrue(guidance.startswith(prefix))
                 self.assertTrue(guidance.endswith(suffix))
-                self.assertEqual(install.configure(home, MODEL, thought_level='medium', apply=True, profile='classic')['changed_files'], [])
+                self.assertEqual(install.configure(home, MODEL, thought_level='medium', apply=True)['changed_files'], [])
 
     def test_existing_role_model_choices_are_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp).resolve()
             agents = home / 'agents'
             agents.mkdir()
-            source = install.PACKAGE / 'profiles/turbo/agents'
+            source = install.PACKAGE / 'agents'
             for role in install.ROLES:
                 template = (source / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
                 legacy = template.replace(b'tools:', b'model: "legacy-provider/legacy-model"\nthoughtLevel: high\ntools:', 1)
@@ -134,7 +133,7 @@ class InstallTests(unittest.TestCase):
                 self.assertIn('thoughtLevel: medium', text)
                 self.assertNotIn('old-provider/old-model', text)
 
-    def test_switch_profiles_preserves_personal_rules_and_models(self):
+    def test_upgrade_existing_install_preserves_personal_rules_and_models(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp).resolve()
             prefix, suffix = b'Personal prefix\r\n', b'\r\nPersonal suffix\r\n'
@@ -144,46 +143,47 @@ class InstallTests(unittest.TestCase):
             state.parent.mkdir()
             original_state = b'{"builtInModelOverrides":{"Explore":"personal/model"}}\n'
             state.write_bytes(original_state)
-            install.configure(home, MODEL, thought_level='high', apply=True)
+            agents = home / 'agents'
+            agents.mkdir()
+            for role in install.ROLES:
+                source = (install.PACKAGE / 'agents' / (role + '.md')).read_bytes()
+                legacy = source.replace(b'injectAgentsMd: true', b'injectAgentsMd: false')
+                legacy = legacy.replace(b'---\n', b'---\nmodel: "' + MODEL.encode() + b'"\nthoughtLevel: high\n', 1)
+                (agents / (role + '.md')).write_bytes(legacy)
 
-            for profile in ('classic', 'turbo'):
-                before = guidance.read_bytes()
-                preview = install.configure(home, profile=profile)
-                self.assertEqual(preview['profile'], profile)
-                self.assertTrue(preview['conflicting_roles'])
-                with self.assertRaises(ValueError):
-                    install.configure(home, profile=profile, apply=True)
-                self.assertEqual(guidance.read_bytes(), before)
+            before = guidance.read_bytes()
+            preview = install.configure(home)
+            self.assertEqual(set(preview['conflicting_roles']), {str(agents / (role + '.md')) for role in install.ROLES})
+            with self.assertRaises(ValueError):
+                install.configure(home, apply=True)
+            self.assertEqual(guidance.read_bytes(), before)
 
-                install.configure(home, profile=profile, replace_existing=True, apply=True)
-                actual = guidance.read_bytes()
-                source = install.PACKAGE if profile == 'classic' else install.PACKAGE / 'profiles/turbo'
-                self.assertTrue(actual.startswith(prefix))
-                self.assertTrue(actual.endswith(suffix))
-                self.assertEqual(actual.count(install.START), 1)
-                self.assertEqual(actual.count(install.END), 1)
-                self.assertIn((source / 'AGENTS.md').read_bytes().strip(), actual)
-                for role in install.ROLES:
-                    actual_role = (home / 'agents' / (role + '.md')).read_bytes()
-                    content, selection = install.split_role_selection(actual_role)
-                    expected = (source / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
-                    self.assertEqual(content, expected)
-                    self.assertIn(('model: "' + MODEL + '"\n').encode('utf-8'), selection)
-                    self.assertIn(b'thoughtLevel: high\n', selection)
-                self.assertEqual(state.read_bytes(), original_state)
-                self.assertEqual(install.configure(home, profile=profile, apply=True)['changed_files'], [])
+            install.configure(home, replace_existing=True, apply=True)
+            actual = guidance.read_bytes()
+            self.assertTrue(actual.startswith(prefix))
+            self.assertTrue(actual.endswith(suffix))
+            self.assertEqual(actual.count(install.START), 1)
+            self.assertEqual(actual.count(install.END), 1)
+            self.assertIn((install.PACKAGE / 'AGENTS.md').read_bytes().strip(), actual)
+            for role in install.ROLES:
+                actual_role = (agents / (role + '.md')).read_bytes()
+                content, selection = install.split_role_selection(actual_role)
+                expected = (install.PACKAGE / 'agents' / (role + '.md')).read_bytes().replace(b'\r\n', b'\n')
+                self.assertEqual(content, expected)
+                self.assertIn(('model: "' + MODEL + '"\n').encode('utf-8'), selection)
+                self.assertIn(b'thoughtLevel: high\n', selection)
+            self.assertEqual(state.read_bytes(), original_state)
+            self.assertEqual(install.configure(home, apply=True)['changed_files'], [])
 
-    def test_profile_cli_defaults_to_turbo_and_allows_classic(self):
+    def test_installer_cli_previews_single_configuration(self):
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / 'new-home'
             command = [sys.executable, str(install.PACKAGE / 'scripts/install.py'), '--zcode-home', str(home)]
-            for option, profile in (([], 'turbo'), (['--profile', 'classic'], 'classic')):
-                with self.subTest(profile=profile):
-                    result = subprocess.run(command + option, capture_output=True, text=True, check=True)
-                    report = json.loads(result.stdout)
-                    self.assertEqual(report['profile'], profile)
-                    self.assertEqual(len(report['changed_files']), 11)
-                    self.assertFalse(home.exists())
+            result = subprocess.run(command, capture_output=True, text=True, check=True)
+            report = json.loads(result.stdout)
+            self.assertNotIn('profile', report)
+            self.assertEqual(len(report['changed_files']), 11)
+            self.assertFalse(home.exists())
 
     def test_default_install_preserves_builtin_and_plugin_state(self):
         with tempfile.TemporaryDirectory() as tmp:

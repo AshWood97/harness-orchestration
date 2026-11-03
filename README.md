@@ -19,7 +19,7 @@ Plan dependencies, delegate independent work, and inspect concrete results—wit
 | --- | --- | --- |
 | Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to four concurrent subagents |
 | Qoder / Qoder CN | [Plugin host setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
-| ZCode | [Role package and installer](zcode/README.md) | Ten custom roles plus two built-in roles; Turbo default and optional Classic profile |
+| ZCode | [Role package and installer](zcode/README.md) | One proactive orchestration configuration, with ten custom and two built-in roles |
 | Codex → Qoder CN | [Desktop workflow](.agents/skills/codex-qoder/SKILL.md) | Codex coordinates visible Qoder CN desktop tasks |
 | Codex → ZCode | [Desktop workflow](.agents/skills/codex-zcode/SKILL.md) | Codex coordinates visible ZCode desktop tasks |
 
@@ -32,9 +32,9 @@ User task → Host coordinator → Plan dependencies → Dispatch ready roles �
                                                ↳ Shared writes stay ordered
 ```
 
-**Qoder v1.1.4:** select the plugin-host **orchestrator** and verify which of the 14 roles the host actually exposes. Resume instructions preserve valid plans and results after interruption or a model switch. A user-reported **v1.1.1** run completed 18 real delegations in batches of 4/4/4/4/2; that result does not validate the v1.1.2 recovery scenarios or the earlier user-level Agent Team. [Quick start and evidence boundaries](qoder/README.md); the linked v1.1.2 release is historical.
+**Qoder v1.1.5 source:** select the plugin-host **orchestrator** before sending a new task and verify which of the 14 roles the host actually exposes. The previous v1.1.4 was checked in Qoder CN 0.5.2 with one real scout dispatch and same-session continuation; that does not establish v1.1.5 runtime behavior or interruption recovery. [Quick start and evidence boundaries](qoder/README.md); the linked v1.1.2 release is historical.
 
-**中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。ZCode 可按需选择 Classic 或 Turbo；各平台保留自己的模型及权限边界。
+**中文简介：** 面向 Codex、Qoder 和 ZCode 的多角色编排配置。先规划依赖，再并行派发独立任务，以明确的文件归属和针对性检查完成交付。ZCode 使用一套积极、按需分工的规则；各平台保留自己的模型及权限边界。
 
 ## 中文
 
@@ -116,15 +116,15 @@ python /absolute/path/to/CODEX_HOME/skills/codex-native-orchestrator/scripts/ins
 
 ### ZCode 角色编排
 
-[ZCode 角色包](zcode/README.md)（[下载 Turbo 2.0](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0)）独立于 Codex ZCode 桌面接入，提供十个自定义角色和 Explore、general-purpose 两个内置角色。默认的 Turbo 2.0 提供分层分流与可裁剪的四波协作模板，可切换到 Classic 关闭 Turbo。主 Agent 按实际依赖派发最多四个并发子角色，并锁定接口和文件归属；不为凑波次增加未授权的测试或审查。
+[ZCode 角色包](zcode/README.md)独立于 Codex ZCode 桌面接入，当前源码 3.0.0 提供一套规则、十个自定义角色和 Explore、general-purpose 两个内置角色。主 Agent 对适合分工的任务积极派发独立工作，按实际依赖最多并发四个子角色，并锁定接口和文件归属；简单任务可直接完成，不为凑波次增加未授权的测试或审查。此前 [Turbo 2.0 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0) 为历史版本，不代表 3.0.0 已发布 Release。
 
-安装器先预览并保留主规则受管区块外的个人内容，默认保留角色已有模型设置。Turbo 角色关闭 `injectAgentsMd`，主 Agent 必须在派单中传递适用项目与用户约束。配置和切换步骤见 [ZCode 安装说明](zcode/README.md)。
+安装器先预览并保留主规则受管区块外的个人内容，默认保留角色已有模型设置。十个自定义角色开启 `injectAgentsMd`；主 Agent 仍须传递任务特有的约束，并向内置 Explore 明确传递适用的项目和用户规则。步骤见 [ZCode 安装说明](zcode/README.md)。
 
 ### Qoder 角色编排
 
-[Qoder v1.1.4](qoder/README.md) 提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话选择 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。[历史 v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [同事复用指南](qoder/Harness-Orchestration-1.1.2-同事复用指南.md)
+[Qoder v1.1.5 源码](qoder/README.md)提供一个插件宿主 orchestrator 和 14 个独立专业角色。新会话在发送首条消息前选择并确认 **orchestrator（主协调器／插件宿主）**，先检查实际可用类型，再用完整 `harness-orchestration:<role>` 标识派发。用户级 Harness Orchestration 与插件宿主的装载范围不同，不能仅凭设置页可见认定可调用。[历史 v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [历史同事复用指南](qoder/Harness-Orchestration-1.1.2-同事复用指南.md)
 
-用户报告 **v1.1.1** 的同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发。v1.1.4 在中断或换模型后按用户要求复用有效计划与结果，仅恢复未完成任务；重派写入前核对实际文件，明确权限拒绝、用户取消或运行时不可用时停止或询问。指南提供恢复测试步骤，但本次未重新运行验证。保持当前模型/provider，共享写入串行、子角色不再委派。修改插件后升版本并重装，再验证新会话；只切开关可能复用旧 roster。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
+用户报告 **v1.1.1** 的同一宿主会话 18 次实际派发全部成功，分五批执行，最多四个并发；v1.1.4 在 Qoder CN 0.5.2 中实际暴露 14 个角色并成功派发一次 scout。v1.1.5 源码要求中断或换模型后复用有效计划与结果、仅恢复未完成任务；重派写入前核对实际文件。上述历史观察不证明新版或恢复场景已实测。保持当前模型/provider，共享写入串行、子角色不再委派；修改插件后升版本并重装，再验证新会话。具体步骤、Agent Team 区别和验证范围见 [Qoder 指南](qoder/README.md)。
 
 ### 公开仓库与验证范围
 
@@ -206,15 +206,15 @@ The old persistent CLI runner, hash evidence machinery and automatic final gate 
 
 ### ZCode role orchestration
 
-The [ZCode role package](zcode/README.md) ([download Turbo 2.0](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0)) is independent of the Codex ZCode desktop integration. It supplies ten custom roles plus Explore and general-purpose. Turbo 2.0 is the default, with tiered routing and an adaptable four-wave workflow; select Classic to turn Turbo off. The host dispatches up to four ready subagents, settles interfaces and owned paths, and avoids unrequested tests or reviews.
+The [ZCode role package](zcode/README.md) is independent of the Codex ZCode desktop integration. Current source version 3.0.0 supplies one proactive rule set, ten custom roles, and the built-in Explore and general-purpose roles. The host delegates independent work when useful, dispatches up to four ready subagents, settles interfaces and owned paths, and avoids unrequested tests or reviews. The previous [Turbo 2.0 release](https://github.com/AshWood97/harness-orchestration/releases/tag/zcode-v2.0.0) is historical; no 3.0.0 Release is implied.
 
-The installer previews changes, preserves personal guidance outside its managed block and keeps existing role model choices by default. Turbo roles disable `injectAgentsMd`, so the host must include applicable project and user constraints in each assignment. See the [ZCode installation guide](zcode/README.md).
+The installer previews changes, preserves personal guidance outside its managed block and keeps existing role model choices by default. Custom roles enable `injectAgentsMd`; the host still passes task-specific constraints and explicitly provides applicable project and user rules to the built-in Explore role. See the [ZCode installation guide](zcode/README.md).
 
 ### Qoder role orchestration
 
-The [v1.1.4 plugin source](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select orchestrator in a new chat and inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host. [Historical v1.1.2 release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Colleague guide](qoder/Harness-Orchestration-1.1.2-同事复用指南.md).
+The [v1.1.5 plugin source](qoder/README.md) supplies an **orchestrator plugin host plus 14 specialist roles**. Select and confirm orchestrator before the first message in a new chat, then inspect actual tool-visible agent types before dispatching namespaced roles. The user-level Harness Orchestration session is not interchangeable with the plugin host. [Historical v1.1.2 release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [Historical colleague guide](qoder/Harness-Orchestration-1.1.2-同事复用指南.md).
 
-The user reported 18 successful real delegations with **v1.1.1** in one host session, batched with at most four concurrent tasks. In v1.1.4, resumption after interruption or a model switch reuses valid plans and results, dispatches only unfinished work, and checks actual file changes before redispatching writes. Explicit permission denial, user cancellation or runtime unavailability requires stopping or asking. The guide provides recovery test steps; those scenarios were not rerun for this update. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
+The user reported 18 successful real delegations with **v1.1.1** in one host session, batched with at most four concurrent tasks; v1.1.4 exposed 14 roles and successfully dispatched one scout in Qoder CN 0.5.2. The v1.1.5 source calls for reusing valid plans and results after interruption or a model switch and checking actual changes before redispatching writes. Those historical observations do not establish the new version or recovery behavior. Preserve the session model/provider, serialize shared writes, and prevent child delegation. After plugin changes, bump the version and reinstall; toggling enabled may retain a stale roster. See the guide for setup, evidence boundaries, and the distinction from Agent Teams.
 
 ### Public repository and verification limits
 

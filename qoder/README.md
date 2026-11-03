@@ -6,7 +6,9 @@
 
 **使用插件宿主 `orchestrator`，在一个会话中按需调用实际可用的专业角色。** 当前源码插件 v1.1.4 包含 15 个 agent 定义：一个主协调宿主和 14 个子角色；定义存在不等于当前会话可派发。保留当前会话模型/provider，不复制 Codex 模型配置。
 
-[历史 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [历史同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)。v1.1.4 使用下方源码打包步骤；本次改动不声称已发布新版 Release 或通过真实宿主验证。
+[历史 v1.1.2 安装包](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) · [历史同事复用指南](Harness-Orchestration-1.1.2-同事复用指南.md)。v1.1.4 使用下方源码打包步骤，尚未发布新版 Release。
+
+2026-11-03 在 Qoder CN 0.5.2 安装 1.1.4 后，新建的 orchestrator 会话列出了 14 个插件角色，并成功派发一个只读 scout 任务；随后在同一会话续接成功。其余 13 个角色仅确认已暴露，未逐个实测；这也不证明中断恢复或其他客户端版本的行为。
 
 ### 安装与新会话调用
 
@@ -109,7 +111,9 @@ zip -r /tmp/harness-orchestration-qoder-1.1.4.zip .qoder-plugin agents skills ho
 
 ### Start with the plugin host
 
-Source version **1.1.4** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Package it using the command above, import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) and [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) are historical; no new Release or successful real-host verification is implied.
+Source version **1.1.4** contains **15 agent definitions: one orchestrator host and 14 specialist roles**. Package it using the command above, import it, start a new chat, and select **orchestrator** (主协调器（插件宿主）). Do not assume the user-level **Harness Orchestration** agent loads the plugin roster. The [v1.1.2 Release](https://github.com/AshWood97/harness-orchestration/releases/tag/qoder-v1.1.2) and [colleague guide](Harness-Orchestration-1.1.2-同事复用指南.md) are historical; no new Release is implied.
+
+On 2026-11-03, Qoder CN 0.5.2 exposed all 14 roles in a new 1.1.4 orchestrator session, successfully dispatched one read-only scout task, and continued in that same session. The other 13 roles were not individually dispatched; interruption recovery and other client versions were not established by this check.
 
 Before assigning work, ask the host to list the agent types actually exposed by its tools. Use the actual full identifiers for the required plugin roles, not invented names such as bare `conductor`. Missing required types must be reported, never simulated or silently replaced with built-ins; simple work stays in the host.
 

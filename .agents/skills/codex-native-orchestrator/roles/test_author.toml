@@ -1,7 +1,7 @@
 name = "test_author"
 description = "Write the smallest case for an assigned concrete behavior gap."
 
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "max"
 sandbox_mode = "workspace-write"
 

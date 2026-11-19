@@ -1,7 +1,7 @@
 name = "guardian"
 description = "Answer one consequential result question left unresolved by ordinary inspection."
 
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 

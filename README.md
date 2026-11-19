@@ -77,9 +77,9 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 | 角色 | 模型 | 推理强度 |
 | --- | --- | --- |
-| conductor、design_critic、debugger、guardian | `gpt-6-astra` | `xhigh` |
+| conductor、design_critic、debugger、guardian | `gpt-6.2-astra` | `xhigh` |
 | explorer、researcher、worker、tester | `gpt-6.1-terra` | `max` |
-| reviewer、finding_validator、test_author | `gpt-6.1-sol` | `max` |
+| reviewer、finding_validator、test_author | `gpt-6.2-sol` | `max` |
 | scout、mechanic、check_runner | `gpt-6-luna` | `max` |
 
 保留 14 种角色，不增加永久角色。多角色任务先由 **Conductor 评估依赖并选择实际需要的角色**，主会话负责派遣；同一角色可以有多个不同范围的实例。简单任务、root-only 和禁止子代理的任务留在主会话。专项角色按具体问题选择，不要求用户逐个点名，也不运行整个角色目录。
@@ -89,6 +89,8 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 最多同时运行 **4 个子代理，不含主会话**，并受实际运行时容量限制。输入齐备、依赖已完成且无写入冲突的任务可以并行；有四项必要任务就同时派发四项，空位出现后接续就绪任务。独立模块的探索、资料研究及接口已确定的独立文件实现都可并发；共享写入和依赖保持有序。不为凑满并发制造任务，四个并发也不等于整个任务只能创建四个实例。
 
 每个角色提示词明确职责、输入、工作方法、结果格式、停止条件和执行边界；任务书再给出一个目标、窄方向、相关上下文和文件范围。减少无关历史，并在上下文仍适合时复用子代理。重要改动可从不同的具体功能角度独立检查，先看原始需求和代码，再参考其他结论；不投票、不重复全量 review、不设置自动最终 Guardian。
+
+编排启用时，若已授权任务要求跟踪部署等操作直至结果，由 Luna `max` 的 `check_runner` 或 `scout` 负责例行状态跟踪，主会话保留总体责任并处理结果；优先使用事件通知，遵守用户指定的间隔与不委派限制。
 
 尽量少做额外测试：先读源码和结果、复用已有观察；重要行为无法据此判断时才安排最小针对性检查，优先现有用例，确有具体缺口才补测试。限制的是以“更稳妥”为由新增无用工作、重复检查、不必要的测试或全量审查，以及主动安全审查、防御性包装、兼容层、未来抽象和额外校验层；鼓励完成既定任务所需的有效并行。用户明确的不测试、只读等限制优先遵守。
 
@@ -173,9 +175,9 @@ Use **plan → implement → inspect each concrete question once → fix concret
 
 | Roles | Model | Effort |
 | --- | --- | --- |
-| conductor, design_critic, debugger, guardian | `gpt-6-astra` | `xhigh` |
+| conductor, design_critic, debugger, guardian | `gpt-6.2-astra` | `xhigh` |
 | explorer, researcher, worker, tester | `gpt-6.1-terra` | `max` |
-| reviewer, finding_validator, test_author | `gpt-6.1-sol` | `max` |
+| reviewer, finding_validator, test_author | `gpt-6.2-sol` | `max` |
 | scout, mechanic, check_runner | `gpt-6-luna` | `max` |
 
 Keep 14 role types without adding permanent roles. For multi-role work, **Conductor assesses dependencies and selects the roles needed**, and the host dispatches them. A role may have several instances with different scopes. Simple work, root-only and no-subagent requests remain in the host. Specialists answer concrete questions; the user need not name each role. Do not run the entire catalog.
@@ -185,6 +187,8 @@ Prefer the smallest capable catalog role: Luna max scout for exact retrieval, me
 Run at most **four subagents concurrently, excluding the host**, within actual runtime capacity. An assignment is ready when inputs are available, dependencies are satisfied and writes do not conflict. Dispatch all four when four useful assignments are ready, and refill freed slots. Independent exploration, research and edits to separately owned files with settled interfaces can run concurrently; order shared writes and dependencies. Do not invent filler tasks. Four is a concurrency limit, not a limit on total instances over the task.
 
 Each role prompt specifies responsibility, inputs, method, result, stopping conditions and execution boundaries. Each assignment adds one objective, a narrow direction, relevant context and owned paths. Avoid unrelated history; reuse a child when its context still fits. Important changes may receive independent checks of distinct concrete functional questions, using original requirements and source before other conclusions. No voting, duplicate full reviews or automatic final Guardian.
+
+When orchestration is active and an authorized task includes tracking a deployment or similar operation to its outcome, delegate routine status tracking to a Luna `max` `check_runner` or `scout`. The host retains overall responsibility and handles results; prefer event notifications and respect user-specified intervals and no-subagent restrictions.
 
 Minimize extra testing: inspect source/results and reuse observations first. Choose the smallest targeted check only for important unresolved behavior, preferring existing cases and adding tests only for a concrete gap. Limit unnecessary work, duplicate checking, unnecessary tests or full reviews, unsolicited security audits, defensive wrappers, compatibility layers, future abstractions and extra verification layers added for reassurance; encourage useful parallel execution of the requested work. Explicit no-tests and read-only instructions take precedence.
 

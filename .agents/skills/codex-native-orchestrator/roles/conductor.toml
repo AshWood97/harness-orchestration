@@ -1,7 +1,7 @@
 name = "conductor"
 description = "Plan scoped work and identify independent ready assignments for concurrent dispatch."
 
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 

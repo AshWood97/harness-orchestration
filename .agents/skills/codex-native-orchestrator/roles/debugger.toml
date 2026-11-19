@@ -1,7 +1,7 @@
 name = "debugger"
 description = "Diagnose a reported defect using source and existing observations."
 
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 

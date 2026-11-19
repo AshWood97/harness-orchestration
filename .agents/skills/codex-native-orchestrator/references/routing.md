@@ -34,6 +34,7 @@ As a child finishes, use its result and fill available capacity with the next re
 | Fill a demonstrated test gap in an assigned testing task | test_author; the smallest relevant case in owned test paths |
 | Settle an assigned behavioral question through an existing test or reproduction | tester; actual command and outcome |
 | Execute a necessary exact command list | check_runner; ordered command outcomes, not another tester on the same commands |
+| Track an authorized deployment or long-running operation | Luna max check_runner for an exact bounded status/watch command, or scout for a bounded status retrieval; follow the deployment tracking rule in SKILL.md |
 
 Prefer the smallest capable role from the fixed catalog. Use Luna max `scout` for exact retrieval, `mechanic` for prescribed edits and `check_runner` for a necessary exact command list. When several such assignments are independent, dispatch them concurrently instead of keeping them in the host or promoting them to a larger model by default. Do not force uncertain design or implementation into a mechanical packet merely to use Luna; use the appropriate catalog role when its capabilities are needed. Preserve each role's configured model and effort.
 

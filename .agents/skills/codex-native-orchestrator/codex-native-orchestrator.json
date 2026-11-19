@@ -13,7 +13,7 @@
   },
   "roles": {
     "conductor": {
-      "model": "gpt-6-astra",
+      "model": "gpt-6.2-astra",
       "reasoning_effort": "xhigh",
       "sandbox_mode": "read-only",
       "automatic": true,
@@ -41,14 +41,14 @@
       "requires_explicit_request": false
     },
     "design_critic": {
-      "model": "gpt-6-astra",
+      "model": "gpt-6.2-astra",
       "reasoning_effort": "xhigh",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "test_author": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.2-sol",
       "reasoning_effort": "max",
       "sandbox_mode": "workspace-write",
       "automatic": false,
@@ -62,28 +62,28 @@
       "requires_explicit_request": false
     },
     "reviewer": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.2-sol",
       "reasoning_effort": "max",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "finding_validator": {
-      "model": "gpt-6.1-sol",
+      "model": "gpt-6.2-sol",
       "reasoning_effort": "max",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "debugger": {
-      "model": "gpt-6-astra",
+      "model": "gpt-6.2-astra",
       "reasoning_effort": "xhigh",
       "sandbox_mode": "read-only",
       "automatic": false,
       "requires_explicit_request": false
     },
     "guardian": {
-      "model": "gpt-6-astra",
+      "model": "gpt-6.2-astra",
       "reasoning_effort": "xhigh",
       "sandbox_mode": "read-only",
       "automatic": false,
@@ -132,7 +132,7 @@
   "config_values": {
     "agents.enabled": true,
     "agents.max_concurrent_threads_per_session": 4,
-    "agents.default_subagent_model": "gpt-6.1-sol",
+    "agents.default_subagent_model": "gpt-6.2-sol",
     "agents.default_subagent_reasoning_effort": "max"
   },
   "installation_scope": "global",

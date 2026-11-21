@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — Codex Native Orchestration
+
+- Raise concurrent capacity to nine subagents plus one host for both manual invocation and Ultra, subject to runtime capacity.
+
 ## ZCode Turbo 2.0 — 2026-10-31
 
 - Make Turbo the default profile with tiered routing and an adaptable four-wave workflow; allow switching back to Classic and choose only work needed for each task.

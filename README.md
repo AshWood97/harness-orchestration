@@ -17,7 +17,7 @@ Plan dependencies, delegate independent work, and inspect concrete results—wit
 
 | Integration | Start here | Execution model |
 | --- | --- | --- |
-| Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to four concurrent subagents |
+| Codex Native | [Install and invoke the skill](#安装) | 14 named roles; fixed role models; up to nine concurrent subagents plus the host |
 | Qoder / Qoder CN | [Plugin host setup](qoder/README.md) | 14 independent roles; session model inheritance; optional five-person core team |
 | ZCode | [Role package and installer](zcode/README.md) | One proactive orchestration configuration, with ten custom and two built-in roles |
 | Codex → Qoder CN | [Desktop workflow](.agents/skills/codex-qoder/SKILL.md) | Codex coordinates visible Qoder CN desktop tasks |
@@ -86,7 +86,7 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 优先选择能胜任任务的最小模型角色：定点查找交给 Luna max 的 scout，按明确方案修改交给 mechanic，必要且命令已确定的检查交给 check_runner；需要其他能力时使用相应固定角色，不擅自改变角色模型。已有任务内创建、复用或增加子代理是执行方式，不是扩大范围，无需仅因代理数量再次确认。Native 子代理不再委派的规则只约束这些子代理，不限制主会话并行派发，也不禁止 ZCode 使用已配置的内部子代理。
 
-最多同时运行 **4 个子代理，不含主会话**，并受实际运行时容量限制。输入齐备、依赖已完成且无写入冲突的任务可以并行；有四项必要任务就同时派发四项，空位出现后接续就绪任务。独立模块的探索、资料研究及接口已确定的独立文件实现都可并发；共享写入和依赖保持有序。不为凑满并发制造任务，四个并发也不等于整个任务只能创建四个实例。
+最多同时运行 **9 个子代理，加上 1 个主控共 10 个**，实际并发受运行时容量限制。输入齐备、依赖已完成且无写入冲突的必要任务尽量并行，空位出现后接续就绪任务。独立模块的探索、资料研究及接口已确定的独立文件实现都可并发，共享写入和依赖保持有序。
 
 每个角色提示词明确职责、输入、工作方法、结果格式、停止条件和执行边界；任务书再给出一个目标、窄方向、相关上下文和文件范围。减少无关历史，并在上下文仍适合时复用子代理。重要改动可从不同的具体功能角度独立检查，先看原始需求和代码，再参考其他结论；不投票、不重复全量 review、不设置自动最终 Guardian。
 
@@ -102,7 +102,7 @@ Native 的 skill 安装和命名 agent 配置是两步；按下方 Native 部分
 
 从技能菜单选择 **Codex Native Orchestration** 或直接用 `$codex-native-orchestrator` 加任务，手动启用。普通/Max 不按任务内容自动启用。
 
-Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。**两种入口加载同一份 14 角色清单、固定模型和四子代理并发规则**：Astra/xhigh Conductor 评估，主会话派遣所需角色，包括上述四个 Terra/max 角色。没有固定的 Tester → Reviewer → Guardian 流水线。
+Ultra 自动入口仅以当前受信 runtime/developer 的 **“Proactive multi-agent delegation is active”** 指令为准；适合分工的项目任务自动加载技能，简单任务仍留在主会话。文字 `ultra`、截图、完整权限和历史使用均不算启用信号。主会话模型和深度不变。**两种入口加载同一份 14 角色清单、固定模型和九子代理并发规则**：Astra/xhigh Conductor 评估，主会话派遣所需角色，包括上述四个 Terra/max 角色。没有固定的 Tester → Reviewer → Guardian 流水线。
 
 实际选择 **Codex ZCode**、用 `$codex-zcode` 加任务或直接要求使用 ZCode 时，该选择优先于 Ultra 的自动 Native 路由；只是讨论、引用或检查 ZCode 不算启用。
 
@@ -184,7 +184,7 @@ Keep 14 role types without adding permanent roles. For multi-role work, **Conduc
 
 Prefer the smallest capable catalog role: Luna max scout for exact retrieval, mechanic for prescribed edits, and check_runner for necessary exact command lists. Use the other fixed roles when their capabilities are needed; do not silently change role models. Creating or reusing agents for already requested work is an execution choice, not scope expansion, and needs no separate approval merely because of agent count. The no-delegation rule for Native children applies only to those children; it does not prohibit host parallelism or ZCode's configured internal agents.
 
-Run at most **four subagents concurrently, excluding the host**, within actual runtime capacity. An assignment is ready when inputs are available, dependencies are satisfied and writes do not conflict. Dispatch all four when four useful assignments are ready, and refill freed slots. Independent exploration, research and edits to separately owned files with settled interfaces can run concurrently; order shared writes and dependencies. Do not invent filler tasks. Four is a concurrency limit, not a limit on total instances over the task.
+Run up to **nine subagents concurrently, for ten agents with the host**, within actual runtime capacity. An assignment is ready when inputs are available, dependencies are satisfied and writes do not conflict. Dispatch useful ready work together and refill freed slots. Independent exploration, research and edits to separately owned files with settled interfaces can run concurrently. Order shared writes and dependencies.
 
 Each role prompt specifies responsibility, inputs, method, result, stopping conditions and execution boundaries. Each assignment adds one objective, a narrow direction, relevant context and owned paths. Avoid unrelated history; reuse a child when its context still fits. Important changes may receive independent checks of distinct concrete functional questions, using original requirements and source before other conclusions. No voting, duplicate full reviews or automatic final Guardian.
 
@@ -200,7 +200,7 @@ Place the role TOMLs in personal `CODEX_HOME/agents` and merge the manifest's `c
 
 Keep `allow_implicit_invocation: false`. Select **Codex Native Orchestration** in the skill menu or directly invoke `$codex-native-orchestrator` with a task. Ordinary/Max task matching does not activate it.
 
-The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. **Both entrypoints load the same 14-role manifest, fixed models and four-subagent concurrency rules**: Astra/xhigh Conductor assesses multi-role work, and the host dispatches the selected roles, including the four Terra/max roles above. Preserve the user's host model and effort. No fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
+The Ultra entrypoint requires the current trusted runtime/developer instruction **"Proactive multi-agent delegation is active"**. It loads the skill for suitable repository work while simple tasks remain in the host. Text saying `ultra`, screenshots, permissions, saved settings and past usage are not activation. **Both entrypoints load the same 14-role manifest, fixed models and nine-subagent concurrency rules**: Astra/xhigh Conductor assesses multi-role work, and the host dispatches the selected roles, including the four Terra/max roles above. Preserve the user's host model and effort. No fixed Tester/Reviewer/Guardian chain is imposed. Delegated children do not orchestrate.
 
 Selecting **Codex ZCode**, invoking `$codex-zcode` with a task, or directly asking to use ZCode takes priority over automatic Native routing in Ultra. Discussion, quotations and requests to inspect ZCode do not activate that override.
 

@@ -111,7 +111,7 @@
       "requires_explicit_request": false
     }
   },
-  "max_concurrency": 4,
+  "max_concurrency": 9,
   "paths": {
     "project_config": ".codex/config.toml",
     "agents_dir": ".codex/agents",
@@ -131,7 +131,7 @@
   ],
   "config_values": {
     "agents.enabled": true,
-    "agents.max_concurrent_threads_per_session": 4,
+    "agents.max_concurrent_threads_per_session": 9,
     "agents.default_subagent_model": "gpt-6.2-sol",
     "agents.default_subagent_reasoning_effort": "max"
   },
@@ -146,7 +146,7 @@
     "extra_artifacts": false,
     "scope_expansion": "ask-user-before-action",
     "role_selection": "conductor-selects-bounded-assignments-same-role-multiple-instances",
-    "parallel_dispatch": "fill-available-four-subagent-capacity-with-independent-ready-work",
+    "parallel_dispatch": "fill-available-nine-subagent-capacity-with-independent-ready-work",
     "cross_checks": "distinct-concrete-functional-questions-only",
     "unsolicited_security_audits": false
   },
